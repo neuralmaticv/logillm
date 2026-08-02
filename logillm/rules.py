@@ -16,6 +16,7 @@ class Rule:
     conditions: list[Comparison]
     result_fact: str
     result_value: float | ThreatLevel
+    priority: int
 
 
 THREAT_RULES: list[Rule] = [
@@ -24,6 +25,7 @@ THREAT_RULES: list[Rule] = [
         conditions=[Comparison(variable="udaljenost", operator="<", value=5)],
         result_fact="nivo_prijetnje",
         result_value=ThreatLevel.CRITICAL,
+        priority=3,
     ),
     Rule(
         name="High Threat",
@@ -33,11 +35,13 @@ THREAT_RULES: list[Rule] = [
         ],
         result_fact="nivo_prijetnje",
         result_value=ThreatLevel.HIGH,
+        priority=2,
     ),
     Rule(
         name="Low Threat",
         conditions=[Comparison(variable="relativna_brzina", operator=">", value=5)],
         result_fact="nivo_prijetnje",
         result_value=ThreatLevel.LOW,
+        priority=1,
     ),
 ]

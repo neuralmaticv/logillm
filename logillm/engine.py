@@ -25,17 +25,20 @@ def evaluate_comparison(comparison: Comparison, facts: Facts) -> bool:
     return op_func(fact_value, comparison.value)
 
 
-def evaluate_rule(rule, facts: Facts) -> bool:
+def evaluate_rule(rule: Rule, facts: Facts) -> bool:
     return all(evaluate_comparison(cond, facts) for cond in rule.conditions)
 
 
-def run_engine(rules, facts: Facts) -> tuple[Facts, list[Rule]]:
+def run_engine(rules: list[Rule], facts: Facts) -> tuple[Facts, list[Rule]]:
     trace: list[Rule] = []
     results = facts.copy()
+    decided: set[str] = set()
 
-    for rule in rules:
+    for rule in sorted(rules, key=lambda r: r.priority, reverse=True):
         if evaluate_rule(rule, results):
-            results[rule.result_fact] = rule.result_value
             trace.append(rule)
+            if rule.result_fact not in decided:
+                results[rule.result_fact] = rule.result_value
+                decided.add(rule.result_fact)
 
     return results, trace
