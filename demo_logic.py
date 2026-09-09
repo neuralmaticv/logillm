@@ -1,8 +1,20 @@
 import sys
 
+from logillm.adas.knowledge_base import (
+    KB,
+    SENSOR_THRESHOLDS,
+    hitno_kocenje,
+    losi_uslovi,
+    magla,
+    nivo_kritican,
+    nivo_visok,
+    smanjena_vidljivost,
+    tempomat_dozvoljen,
+    validate_vocabulary,
+)
 from logillm.facts import Facts, ThreatLevel
-from logillm.grounding import SENSOR_THRESHOLDS, ground
-from logillm.logic.formula import And, Formula, Implies, Not, Var
+from logillm.grounding import ground
+from logillm.logic.formula import Formula, Implies
 from logillm.logic.semantics import (
     as_formulas,
     consistency,
@@ -12,27 +24,6 @@ from logillm.logic.semantics import (
 )
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
-magla = Var("magla")
-blizu = Var("blizu")
-koci_ispred = Var("koci_ispred")
-smanjena_vidljivost = Var("smanjena_vidljivost")
-losi_uslovi = Var("losi_uslovi")
-rizik_sudara = Var("rizik_sudara")
-nivo_visok = Var("nivo_visok")
-nivo_kritican = Var("nivo_kritican")
-hitno_kocenje = Var("hitno_kocenje")
-tempomat_dozvoljen = Var("tempomat_dozvoljen")
-
-KB: list[Formula] = [
-    Implies(magla, smanjena_vidljivost),
-    Implies(smanjena_vidljivost, losi_uslovi),
-    Implies(And(blizu, koci_ispred), rizik_sudara),
-    Implies(rizik_sudara, nivo_visok),
-    Implies(And(rizik_sudara, losi_uslovi), nivo_kritican),
-    Implies(nivo_kritican, hitno_kocenje),
-    Implies(losi_uslovi, Not(tempomat_dozvoljen)),
-]
 
 SCENARIOS: list[tuple[str, Facts]] = [
     (
@@ -114,6 +105,8 @@ def show_scenarios() -> None:
 
 
 def main() -> None:
+    validate_vocabulary()
+
     show_truth_table(Implies(magla, smanjena_vidljivost))
     print("  Bez magle pravilo nije prekršeno, pa je implikacija tačna.")
 
