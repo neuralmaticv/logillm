@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
@@ -25,6 +25,7 @@ class LLMConfig:
     base_url: str
     model: str
     api_key: str | None = None
+    extra_payload: dict[str, object] = field(default_factory=dict)
 
     @property
     def headers(self) -> dict[str, str]:
@@ -47,10 +48,12 @@ def llm_config(provider: str | None = None) -> LLMConfig:
     provider = (provider or os.environ.get("LOGILLM_LLM_PROVIDER", "local")).lower()
 
     if provider == "local":
+        thinking = os.environ.get("LOGILLM_LOCAL_THINKING", "0") == "1"
         return LLMConfig(
             provider="local",
             base_url=os.environ.get("LOGILLM_LOCAL_URL", "http://127.0.0.1:8111/v1"),
             model=os.environ.get("LOGILLM_LOCAL_MODEL", "Qwen/Qwen3.5-9B"),
+            extra_payload={"chat_template_kwargs": {"enable_thinking": thinking}},
         )
 
     if provider == "openai":

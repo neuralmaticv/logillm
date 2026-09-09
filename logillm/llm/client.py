@@ -25,6 +25,7 @@ def ask(
             {"role": "user", "content": user},
         ],
         "temperature": temperature,
+        **config.extra_payload,
     }
     request = urllib.request.Request(
         f"{config.base_url}/chat/completions",

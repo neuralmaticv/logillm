@@ -16,6 +16,19 @@ class Query:
     target: str
 
 
+def strip_reasoning(text: str) -> str:
+    """Drops a reasoning block emitted by models.
+
+    Everything after the closing tag </think> is the actual answer.
+    """
+    if "</think>" in text:
+        return text.rsplit("</think>", 1)[1].strip()
+    if "<think>" in text:
+        # opening tag with no closing one: the model never finished thinking
+        return text.split("<think>", 1)[0].strip()
+    return text.strip()
+
+
 def strip_code_fence(text: str) -> str:
     stripped = text.strip()
     if not stripped.startswith("```"):
@@ -28,7 +41,7 @@ def strip_code_fence(text: str) -> str:
 
 def _parse(raw: str) -> dict:
     try:
-        data = json.loads(strip_code_fence(raw))
+        data = json.loads(strip_code_fence(strip_reasoning(raw)))
     except json.JSONDecodeError as error:
         raise ValidationError(f"Reply is not valid JSON: {error}") from error
     if not isinstance(data, dict):
