@@ -1,6 +1,10 @@
+import sys
+
 from logillm.engine import run_engine
 from logillm.facts import Facts
 from logillm.rules import THREAT_RULES
+
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCENARIOS: list[Facts] = [
     {"udaljenost": 3, "relativna_brzina": 10},

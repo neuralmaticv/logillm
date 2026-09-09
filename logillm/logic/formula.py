@@ -11,7 +11,7 @@ class Var:
 
 @dataclass(frozen=True)
 class Not:
-    operand: "Formula"
+    operand: Formula
 
     def __str__(self) -> str:
         return f"~{self.operand}"
@@ -19,8 +19,8 @@ class Not:
 
 @dataclass(frozen=True)
 class And:
-    left: "Formula"
-    right: "Formula"
+    left: Formula
+    right: Formula
 
     def __str__(self) -> str:
         return f"({self.left} & {self.right})"
@@ -28,8 +28,8 @@ class And:
 
 @dataclass(frozen=True)
 class Or:
-    left: "Formula"
-    right: "Formula"
+    left: Formula
+    right: Formula
 
     def __str__(self) -> str:
         return f"({self.left} | {self.right})"
@@ -37,8 +37,8 @@ class Or:
 
 @dataclass(frozen=True)
 class Implies:
-    left: "Formula"
-    right: "Formula"
+    left: Formula
+    right: Formula
 
     def __str__(self) -> str:
         return f"({self.left} -> {self.right})"
@@ -46,8 +46,8 @@ class Implies:
 
 @dataclass(frozen=True)
 class Iff:
-    left: "Formula"
-    right: "Formula"
+    left: Formula
+    right: Formula
 
     def __str__(self) -> str:
         return f"({self.left} <-> {self.right})"
