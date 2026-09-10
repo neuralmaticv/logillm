@@ -4,8 +4,10 @@ from logillm.adas.knowledge_base import KB, SENSOR_THRESHOLDS
 from logillm.config import llm_config
 from logillm.facts import Facts
 from logillm.grounding import ground
+from logillm.llm.explain import explain
 from logillm.llm.translate import translate
 from logillm.llm.validate import Query, ValidationError, validate
+from logillm.logic.derivation import conflict_core, derive, relevant
 from logillm.logic.formula import Var
 from logillm.logic.semantics import as_formulas, consistency, entails, format_valuation
 
@@ -23,20 +25,31 @@ DRIVER_INPUTS = [
 ]
 
 
-def decide(query: Query, facts: Facts) -> str:
-    premises = [*KB, *as_formulas(ground(SENSOR_THRESHOLDS, facts))]
+def decide(query: Query, facts: Facts) -> tuple[str, list[str]]:
+    """Returns the verdict and the facts it rests on, for the explanation step."""
+    valuation = ground(SENSOR_THRESHOLDS, facts)
+    premises = [*KB, *as_formulas(valuation)]
     target = Var(query.target)
+    observed = format_valuation(valuation, only_true=True) or "(ništa posebno)"
 
     if query.mode == "claim":
         result = entails(premises, target)
         if result.entailed:
-            return "MORA VAŽITI"
-        protivprimjer = format_valuation(result.countermodel or {}, only_true=True) or "(ništa)"
-        return f"NE MORA VAŽITI (protivprimjer: {protivprimjer})"
+            _, trace = derive(KB, valuation)
+            rules = [str(step.rule) for step in relevant(trace, query.target)]
+            return "MORA VAŽITI", [f"senzori pokazuju: {observed}", *rules]
+
+        other = format_valuation(result.countermodel or {}, only_true=True) or "(ništa)"
+        return "NE MORA VAŽITI", [
+            f"senzori pokazuju: {observed}",
+            f"moguć je slučaj u kojem važi samo: {other}",
+        ]
 
     if consistency([*premises, target]).consistent:
-        return "SMIJE"
-    return "NE SMIJE (u sukobu s bazom znanja)"
+        return "SMIJE", [f"senzori pokazuju: {observed}", "nijedno pravilo to ne zabranjuje"]
+
+    core = conflict_core([*premises, target])
+    return "NE SMIJE", [f"senzori pokazuju: {observed}", *(str(formula) for formula in core)]
 
 
 def run(text: str, config) -> None:
@@ -52,7 +65,12 @@ def run(text: str, config) -> None:
         return
 
     for description, facts in SCENARIOS:
-        print(f"  {description:28} -> {decide(query, facts)}")
+        verdict, evidence = decide(query, facts)
+        print(f"\n  {description}")
+        print(f"    presuda:     {verdict}")
+        for item in evidence:
+            print(f"    osnov:       {item}")
+        print(f"    objašnjenje: {explain(text, verdict, evidence, config=config).strip()}")
 
 
 def main() -> None:
