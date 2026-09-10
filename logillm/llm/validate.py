@@ -1,9 +1,14 @@
 import json
+import math
 from dataclasses import dataclass
 
-from logillm.adas.knowledge_base import VOCABULARY
+from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS
 
 MODES = frozenset({"claim", "request"})
+REQUIRED_FIELDS = frozenset({"mode", "target"})
+OPTIONAL_FIELDS = frozenset({"speed_kmh"})
+ALLOWED_FIELDS = REQUIRED_FIELDS | OPTIONAL_FIELDS
+SPEED_TARGETS = frozenset({"tempomat_dozvoljen"})
 
 
 class ValidationError(Exception):
@@ -14,6 +19,7 @@ class ValidationError(Exception):
 class Query:
     mode: str
     target: str
+    speed_kmh: float | None = None
 
 
 def strip_reasoning(text: str) -> str:
@@ -58,12 +64,38 @@ def _mode(data: dict) -> str:
 
 def _target(data: dict) -> str:
     target = data.get("target")
-    if target not in VOCABULARY:
+    if target not in QUERY_TARGETS:
         raise ValidationError(f"Unknown target {target!r}.")
     return target
+
+
+def _speed(data: dict, target: str) -> float | None:
+    if "speed_kmh" not in data:
+        return None
+    value = data["speed_kmh"]
+    if target not in SPEED_TARGETS:
+        raise ValidationError(f"Target {target!r} does not accept a speed.")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValidationError("Field 'speed_kmh' must be a number.")
+    if not math.isfinite(value) or value <= 0:
+        raise ValidationError("Field 'speed_kmh' must be a positive finite number.")
+    return float(value)
 
 
 def validate(raw: str) -> Query:
     """Turns a raw model reply into a query the logic layer may act on."""
     data = _parse(raw)
-    return Query(mode=_mode(data), target=_target(data))
+    fields = set(data)
+    if not REQUIRED_FIELDS <= fields or not fields <= ALLOWED_FIELDS:
+        raise ValidationError(
+            f"Reply must contain {sorted(REQUIRED_FIELDS)} "
+            f"and may contain {sorted(OPTIONAL_FIELDS)}. "
+            f"Missing: {sorted(REQUIRED_FIELDS - fields)}. "
+            f"Unexpected: {sorted(fields - ALLOWED_FIELDS)}."
+        )
+
+    mode = _mode(data)
+    target = _target(data)
+    if mode == "request" and target not in REQUESTABLE_VARS:
+        raise ValidationError(f"Target {target!r} cannot be requested.")
+    return Query(mode=mode, target=target, speed_kmh=_speed(data, target))
