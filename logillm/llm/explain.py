@@ -8,7 +8,11 @@ never change it, and never add anything that is not in the evidence you are give
 If the evidence is thin, say less rather than filling the gap.
 
 Write the way you would speak to someone behind the wheel: no rule names, no
-variable names, no logical notation."""
+variable names, no logical notation.
+
+Address the driver directly and informally, in the second person singular
+("ti" form): "usporavaj", "ne pretiči", "moraš". Never use the polite plural
+("vi" form) and never speak about the driver in the third person."""
 
 
 def explain(
