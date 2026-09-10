@@ -12,6 +12,7 @@ from logillm.adas.knowledge_base import (
     usporavanje_potrebno,
     validate_vocabulary,
 )
+from logillm.adas.scenarios import ALL_SCENARIOS
 from logillm.facts import Facts, ThreatLevel
 from logillm.grounding import ground
 from logillm.logic.formula import Formula, Implies
@@ -24,29 +25,6 @@ from logillm.logic.semantics import (
 )
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
-SCENARIOS: list[tuple[str, Facts]] = [
-    (
-        "smanjena vidljivost, vozilo je blizu i brzo mu se približavamo",
-        {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 30},
-    ),
-    (
-        "dobra vidljivost, vozilo je blizu i brzo mu se približavamo",
-        {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 500},
-    ),
-    (
-        "dobra vidljivost, vozilo je veoma blizu i brzo mu se približavamo",
-        {"udaljenost": 3, "relativna_brzina": 9, "vidljivost": 500},
-    ),
-    (
-        "smanjena vidljivost, put je slobodan",
-        {"udaljenost": 60, "relativna_brzina": 0, "vidljivost": 30},
-    ),
-    (
-        "dobra vidljivost, put je slobodan",
-        {"udaljenost": 60, "relativna_brzina": 0, "vidljivost": 500},
-    ),
-]
 
 
 def section(title: str) -> None:
@@ -99,12 +77,13 @@ def show_consistency(premises: list[Formula], request: Formula, title: str) -> N
 
 
 def show_scenarios() -> None:
-    for description, facts in SCENARIOS:
+    for scenario in ALL_SCENARIOS:
+        facts = scenario.facts
         valuation = ground(SENSOR_THRESHOLDS, facts)
         premises = premises_for(facts)
         active = format_valuation(valuation, only_true=True) or "(ništa)"
 
-        print(f"\n  {description}")
+        print(f"\n  {scenario.description}")
         print(f"    senzori:  {facts}")
         print(f"    važi:     {active}")
         print(f"    nivo:     {threat_level(premises)}")
@@ -121,7 +100,7 @@ def main() -> None:
 
     show_scenarios()
 
-    _, first_scenario = SCENARIOS[0]
+    first_scenario = ALL_SCENARIOS[0].facts
     show_entailment(
         premises_for(first_scenario),
         hitno_kocenje,

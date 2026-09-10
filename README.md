@@ -20,31 +20,28 @@ Uz odluku se čuva i formalni osnov, kao što su relevantni koraci izvođenja, n
 
 ## Primjer
 
-Ista rečenica vozača, dva različita očitavanja senzora. Prevod je u oba slučaja identičan; presudu mijenjaju senzori.
+Isti upit korisnika, dva različita očitavanja senzora. Prevod je u oba slučaja identičan; presudu mijenjaju senzori.
 
 ```text
-vozač:   Treba li da kočim?
-prevod:  {"mode": "claim", "target": "hitno_kocenje"}
+korisnik: Postoji li opasnost od sudara?
+prevod:   {"mode": "claim", "target": "rizik_sudara"}
 
   smanjena vidljivost, vozilo je blizu i brzo mu se približavamo
     presuda:     MORA VAŽITI
-    osnov:       sa senzora: blizu, brzo_priblizavanje, smanjena_vidljivost
-    osnov:       (smanjena_vidljivost -> losi_uslovi)
+    osnov:       sa senzora: blizu, brzo_priblizavanje
     osnov:       ((blizu & brzo_priblizavanje) -> rizik_sudara)
-    osnov:       ((rizik_sudara & losi_uslovi) -> nivo_kritican)
-    osnov:       (nivo_kritican -> hitno_kocenje)
-    objašnjenje: Moraš odmah kočiti jer se vozilo približava brzo u lošim uslovima vidljivosti. Ovo je hitno potrebno kako bi se izbegao sudar.
+    objašnjenje: Postoji opasnost od sudara jer je vozilo blizu i brzo mu se približavamo.
 
-  dobra vidljivost, put je slobodan
+  dobra vidljivost, vozilo ostaje na sigurnoj udaljenosti
     presuda:     NE MORA VAŽITI
-    osnov:       nije utvrđeno: hitno_kocenje
-    osnov:       jer nije ispunjeno: blizu, brzo_priblizavanje, smanjena_vidljivost, veoma_blizu
-    objašnjenje: Ne moraš kočiti jer nema hitne potrebe za to. Nastavi vožnju bez dodatnih akcija.
+    osnov:       nije utvrđeno: rizik_sudara
+    osnov:       jer nije ispunjeno: blizu, brzo_priblizavanje
+    objašnjenje: Očitavanja ne ukazuju na opasnost od sudara jer vozilo ostaje na sigurnoj udaljenosti.
 ```
 
 Šta se iz ovoga vidi:
 
-- **Zaključak je izveden u pet koraka.** Nijedno pravilo ne povezuje maglu i kočenje neposredno; taj put nastaje uzastopnom primjenom pravila iz baze znanja.
+- **Senzorska očitavanja određuju rezultat.** LLM prevodi isti upit na isti način, dok formalni sloj procjenjuje svaku situaciju zasebno.
 - **Objašnjenje se zasniva isključivo na navedenom osnovu.** LLM dobija odluku i pravila koja su do nje dovela, bez mogućnosti da ih dopuni ili izmijeni.
 - **Presuda je deterministička, za razliku od objašnjenja.** Ponovno pokretanje istog scenarija daje istu odluku, dok se tekst objašnjenja može razlikovati.
 
@@ -105,9 +102,9 @@ Za lokalni LLM potrebno je podesiti adresu vLLM servera i naziv modela. Za OpenA
 CLI je glavni entry point za pokretanje cijelog pipelinea nad jednom izjavom korisnika i jednim skupom senzorskih očitavanja:
 
 ```bash
-uv run logillm "Treba li da kočim?" \
-  --udaljenost 8 \
-  --relativna-brzina 9 \
+uv run logillm "Postoji li opasnost od sudara?" \
+  --udaljenost 12 \
+  --relativna-brzina 6 \
   --vidljivost 30
 ```
 

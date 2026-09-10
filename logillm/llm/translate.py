@@ -10,11 +10,17 @@ EXAMPLES: list[tuple[str, dict]] = [
         "Postavi brzinu na 100 km/h.",
         {"mode": "request", "target": "tempomat_dozvoljen", "speed_kmh": 100},
     ),
-    ("Mogu li uključiti tempomat?", {"mode": "claim", "target": "tempomat_dozvoljen"}),
-    ("Treba li da kočim?", {"mode": "claim", "target": "hitno_kocenje"}),
-    ("Treba li da usporim?", {"mode": "claim", "target": "usporavanje_potrebno"}),
-    ("Jesu li uslovi loši?", {"mode": "claim", "target": "losi_uslovi"}),
-    ("Prijeti li sudar?", {"mode": "claim", "target": "rizik_sudara"}),
+    (
+        "Da li je bezbjedno uključiti tempomat?",
+        {"mode": "claim", "target": "tempomat_dozvoljen"},
+    ),
+    ("Da li je potrebno hitno kočenje?", {"mode": "claim", "target": "hitno_kocenje"}),
+    (
+        "Da li treba da smanjim brzinu?",
+        {"mode": "claim", "target": "usporavanje_potrebno"},
+    ),
+    ("Da li su uslovi za vožnju loši?", {"mode": "claim", "target": "losi_uslovi"}),
+    ("Postoji li opasnost od sudara?", {"mode": "claim", "target": "rizik_sudara"}),
 ]
 
 

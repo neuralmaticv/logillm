@@ -1,7 +1,7 @@
 import sys
 
+from logillm.adas.scenarios import LLM_SCENARIOS
 from logillm.config import llm_config
-from logillm.facts import Facts
 from logillm.llm.explain import explain
 from logillm.llm.translate import translate
 from logillm.llm.validate import ValidationError, validate
@@ -9,21 +9,11 @@ from logillm.pipeline import decide
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-SCENARIOS: list[tuple[str, Facts]] = [
-    (
-        "smanjena vidljivost, vozilo je blizu i brzo mu se približavamo",
-        {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 30},
-    ),
-    (
-        "dobra vidljivost, vozilo je veoma blizu i brzo mu se približavamo",
-        {"udaljenost": 3, "relativna_brzina": 9, "vidljivost": 500},
-    ),
-    ("dobra vidljivost, put je slobodan", {"udaljenost": 60, "relativna_brzina": 0, "vidljivost": 500}),
-]
-
 DRIVER_INPUTS = [
     "Uključi tempomat.",
-    "Treba li da kočim?",
+    "Postavi tempomat na 100 km/h.",
+    "Postoji li opasnost od sudara?",
+    "Da li treba da smanjim brzinu?",
 ]
 
 
@@ -39,9 +29,9 @@ def run(text: str, config) -> None:
         print(f"         ODBIJENO - {error}")
         return
 
-    for description, facts in SCENARIOS:
-        decision = decide(query, facts)
-        print(f"\n  {description}")
+    for scenario in LLM_SCENARIOS:
+        decision = decide(query, scenario.facts)
+        print(f"\n  {scenario.description}")
         print(f"    presuda:     {decision.verdict}")
         for item in decision.evidence:
             print(f"    osnov:       {item}")
