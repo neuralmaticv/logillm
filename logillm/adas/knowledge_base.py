@@ -24,6 +24,7 @@ KB: list[Formula] = [
     Implies(And(rizik_sudara, losi_uslovi), nivo_kritican),
     Implies(nivo_kritican, hitno_kocenje),
     Implies(losi_uslovi, Not(tempomat_dozvoljen)),
+    Implies(rizik_sudara, Not(tempomat_dozvoljen)),
 ]
 
 SENSOR_THRESHOLDS: dict[str, list[Comparison]] = {
