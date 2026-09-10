@@ -5,11 +5,11 @@ from logillm.adas.knowledge_base import (
     SENSOR_THRESHOLDS,
     hitno_kocenje,
     losi_uslovi,
-    magla,
     nivo_kritican,
     nivo_visok,
     smanjena_vidljivost,
     tempomat_dozvoljen,
+    usporavanje_potrebno,
     validate_vocabulary,
 )
 from logillm.facts import Facts, ThreatLevel
@@ -27,16 +27,24 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCENARIOS: list[tuple[str, Facts]] = [
     (
-        "magla, vozilo ispred naglo koči",
+        "smanjena vidljivost, vozilo je blizu i brzo mu se približavamo",
         {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 30},
     ),
     (
-        "vedro, vozilo ispred naglo koči",
+        "dobra vidljivost, vozilo je blizu i brzo mu se približavamo",
         {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 500},
     ),
     (
-        "magla, put slobodan",
+        "dobra vidljivost, vozilo je veoma blizu i brzo mu se približavamo",
+        {"udaljenost": 3, "relativna_brzina": 9, "vidljivost": 500},
+    ),
+    (
+        "smanjena vidljivost, put je slobodan",
         {"udaljenost": 60, "relativna_brzina": 0, "vidljivost": 30},
+    ),
+    (
+        "dobra vidljivost, put je slobodan",
+        {"udaljenost": 60, "relativna_brzina": 0, "vidljivost": 500},
     ),
 ]
 
@@ -101,14 +109,15 @@ def show_scenarios() -> None:
         print(f"    važi:     {active}")
         print(f"    nivo:     {threat_level(premises)}")
         print(f"    kočenje:  {'DA' if entails(premises, hitno_kocenje).entailed else 'ne'}")
+        print(f"    uspori:   {'DA' if entails(premises, usporavanje_potrebno).entailed else 'ne'}")
         print(f"    tempomat: {'SMIJE' if consistency([*premises, tempomat_dozvoljen]).consistent else 'NE SMIJE'}")
 
 
 def main() -> None:
     validate_vocabulary()
 
-    show_truth_table(Implies(magla, smanjena_vidljivost))
-    print("  Bez magle pravilo nije prekršeno, pa je implikacija tačna.")
+    show_truth_table(Implies(smanjena_vidljivost, losi_uslovi))
+    print("  Kada vidljivost nije smanjena, implikacija nije prekršena.")
 
     show_scenarios()
 

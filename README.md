@@ -12,11 +12,11 @@ Sistem prima dvije međusobno nezavisne vrste ulaza: očitavanja senzora i izjav
 
 **Baza znanja** objedinjuje pragove senzora, dozvoljene pojmove i formalna pravila ADAS domena. Tokom **grounding** koraka numerička očitavanja se, prema tim pragovima, pretvaraju u istinitosne vrijednosti logičkih činjenica. Time se podaci prevode u oblik koji formalni sloj može obraditi.
 
-Izjava korisnika prolazi odvojenim putem. LLM je pretvara u strukturirani upit koji sadrži vrstu namjere i ciljni pojam iz baze znanja. Dobijeni upit se zatim validira: prihvataju se samo očekivana struktura, podržana vrsta namjere i unaprijed definisani pojmovi koje sistem može obraditi.
+Izjava korisnika prolazi odvojenim putem. LLM je pretvara u strukturirani upit koji sadrži vrstu namjere, ciljni pojam i, kada je potrebno, brojčanu vrijednost iz korisničkog zahtjeva. Dobijeni upit se zatim validira: prihvataju se samo očekivana struktura, podržana vrsta namjere i unaprijed definisani pojmovi koje sistem može obraditi.
 
 **Logičko jezgro** povezuje validirani upit sa činjenicama dobijenim iz senzora i pravilima iz baze znanja. Ako korisnik postavlja pitanje, provjerava se da li traženi zaključak slijedi iz tih činjenica i pravila. Ako zahtijeva radnju, provjerava se da li je ona u skladu sa trenutnim stanjem i pravilima.
 
-Uz odluku se čuva i formalni osnov, kao što su relevantni koraci izvođenja, protivprimjer ili konfliktna pravila. LLM taj već utvrđeni rezultat samo pretvara u kratko objašnjenje razumljivo korisniku.
+Uz odluku se čuva i formalni osnov, kao što su relevantni koraci izvođenja, neispunjeni uslovi ili konfliktna pravila. LLM taj već utvrđeni rezultat samo pretvara u kratko objašnjenje razumljivo korisniku.
 
 ## Primjer
 
@@ -26,21 +26,20 @@ Ista rečenica vozača, dva različita očitavanja senzora. Prevod je u oba slu�
 vozač:   Treba li da kočim?
 prevod:  {"mode": "claim", "target": "hitno_kocenje"}
 
-  magla, vozilo ispred koči
+  smanjena vidljivost, vozilo je blizu i brzo mu se približavamo
     presuda:     MORA VAŽITI
-    osnov:       senzori pokazuju: blizu, koci_ispred, magla
-    osnov:       (magla -> smanjena_vidljivost)
+    osnov:       sa senzora: blizu, brzo_priblizavanje, smanjena_vidljivost
     osnov:       (smanjena_vidljivost -> losi_uslovi)
-    osnov:       ((blizu & koci_ispred) -> rizik_sudara)
+    osnov:       ((blizu & brzo_priblizavanje) -> rizik_sudara)
     osnov:       ((rizik_sudara & losi_uslovi) -> nivo_kritican)
     osnov:       (nivo_kritican -> hitno_kocenje)
-    objašnjenje: Usmeri se na kočenje jer je pred tobom vozilo u magli. Ovo je hitno potrebno da izbegneš sudar u ovim lošim uslovima.
+    objašnjenje: Moraš odmah kočiti jer se vozilo približava brzo u lošim uslovima vidljivosti. Ovo je hitno potrebno kako bi se izbegao sudar.
 
-  vedro, put slobodan
+  dobra vidljivost, put je slobodan
     presuda:     NE MORA VAŽITI
-    osnov:       senzori pokazuju: (ništa posebno)
-    osnov:       moguć je slučaj u kojem važi samo: (ništa)
-    objašnjenje: Ne moraš kočiti jer senzori ne pokazuju ništa posebno. Nastavi vožnju bez ikakvih promena brzine.
+    osnov:       nije utvrđeno: hitno_kocenje
+    osnov:       jer nije ispunjeno: blizu, brzo_priblizavanje, smanjena_vidljivost, veoma_blizu
+    objašnjenje: Ne moraš kočiti jer nema hitne potrebe za to. Nastavi vožnju bez dodatnih akcija.
 ```
 
 Šta se iz ovoga vidi:
@@ -80,7 +79,7 @@ Za pokretanje cijelog hibridnog sistema prvo kopirajte primjer konfiguracije:
 cp .env.example .env
 ```
 
-Podešavanja se čitaju iz `.env`. Promjenljive okruženja imaju prednost nad nad tim vrijednostima tako da se pojedinačne vrijednosti mogu privremeno promijeniti bez izmjene fajla.
+Podešavanja se čitaju iz `.env`, dok ih vrijednosti zadane kroz okruženje mogu privremeno nadjačati.
 
 ```bash
 # LLM provider: local | openai
@@ -126,6 +125,16 @@ Spisak svih argumenata:
 
 ```bash
 uv run logillm --help
+```
+
+Zahtjev za postavljanje brzine tumači se kao podešavanje tempomata. LLM izdvaja traženu brzinu, dok formalni sloj odlučuje da li je ona dozvoljena u odnosu na ograničenje i trenutno stanje:
+
+```bash
+uv run logillm "Postavi brzinu na 100 km/h." \
+  --udaljenost 60 \
+  --relativna-brzina 0 \
+  --vidljivost 500 \
+  --ogranicenje-brzine 130
 ```
 
 Postojeće demo skripte za unaprijed definisane primjere:

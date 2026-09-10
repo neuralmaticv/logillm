@@ -10,9 +10,15 @@ from logillm.pipeline import decide
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SCENARIOS: list[tuple[str, Facts]] = [
-    ("magla, vozilo ispred koči", {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 30}),
-    ("vedro, vozilo ispred koči", {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 500}),
-    ("vedro, put slobodan", {"udaljenost": 60, "relativna_brzina": 0, "vidljivost": 500}),
+    (
+        "smanjena vidljivost, vozilo je blizu i brzo mu se približavamo",
+        {"udaljenost": 8, "relativna_brzina": 9, "vidljivost": 30},
+    ),
+    (
+        "dobra vidljivost, vozilo je veoma blizu i brzo mu se približavamo",
+        {"udaljenost": 3, "relativna_brzina": 9, "vidljivost": 500},
+    ),
+    ("dobra vidljivost, put je slobodan", {"udaljenost": 60, "relativna_brzina": 0, "vidljivost": 500}),
 ]
 
 DRIVER_INPUTS = [
