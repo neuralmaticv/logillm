@@ -84,6 +84,29 @@ def relevant(steps: list[Step], target: str) -> list[Step]:
     return list(reversed(chosen))
 
 
+def blocking_conditions(kb: list[Formula], target: str, known: Valuation) -> set[str]:
+    """Conditions that stand between what is known and the target"""
+
+    def walk(name: str, seen: frozenset[str]) -> set[str]:
+        if known.get(name) is True:
+            return set()
+        if name in seen:
+            return {name}
+
+        bodies = [parts[0] for rule in kb if (parts := _rule_parts(rule)) and parts[1] == name and parts[2]]
+        if not bodies:
+            return {name}
+
+        missing: set[str] = set()
+        for body in bodies:
+            for variable in variables(body):
+                if known.get(variable) is not True:
+                    missing |= walk(variable, seen | {name})
+        return missing
+
+    return walk(target, frozenset())
+
+
 def conflict_core(formulas: list[Formula]) -> list[Formula]:
     """The formulas that make a set contradictory, with the rest removed.
 
