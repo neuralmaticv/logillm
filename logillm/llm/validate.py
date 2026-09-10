@@ -23,22 +23,25 @@ class Query:
 
 
 def strip_reasoning(text: str) -> str:
-    """Drops a reasoning block emitted by models.
+    """Remove an optional reasoning block emitted by a model.
 
-    Everything after the closing tag </think> is the actual answer.
+    Treat content after the last closing tag as the answer. If the model emitted
+    only an opening tag, keep the content that appeared before it.
     """
     if "</think>" in text:
         return text.rsplit("</think>", 1)[1].strip()
     if "<think>" in text:
-        # opening tag with no closing one: the model never finished thinking
+        # The model opened a reasoning block but did not close it.
         return text.split("<think>", 1)[0].strip()
     return text.strip()
 
 
 def strip_code_fence(text: str) -> str:
+    """Remove one optional Markdown code fence from a model reply."""
     stripped = text.strip()
     if not stripped.startswith("```"):
         return stripped
+
     lines = stripped.splitlines()
     if lines[-1].strip() == "```":
         lines = lines[:-1]
@@ -50,6 +53,7 @@ def _parse(raw: str) -> dict:
         data = json.loads(strip_code_fence(strip_reasoning(raw)))
     except json.JSONDecodeError as error:
         raise ValidationError(f"Reply is not valid JSON: {error}") from error
+
     if not isinstance(data, dict):
         raise ValidationError(f"Reply is not a JSON object but {type(data).__name__}.")
     return data
@@ -72,6 +76,7 @@ def _target(data: dict) -> str:
 def _speed(data: dict, target: str) -> float | None:
     if "speed_kmh" not in data:
         return None
+
     value = data["speed_kmh"]
     if target not in SPEED_TARGETS:
         raise ValidationError(f"Target {target!r} does not accept a speed.")
@@ -83,7 +88,7 @@ def _speed(data: dict, target: str) -> float | None:
 
 
 def validate(raw: str) -> Query:
-    """Turns a raw model reply into a query the logic layer may act on."""
+    """Convert a raw model reply into a query accepted by the logic layer."""
     data = _parse(raw)
     fields = set(data)
     if not REQUIRED_FIELDS <= fields or not fields <= ALLOWED_FIELDS:

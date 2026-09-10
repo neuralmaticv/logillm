@@ -1,9 +1,8 @@
-# ADAS knowledge base: inference rules for the logic layer,
-# and closed vocabulary that constrains LLM output
+"""ADAS inference rules and proposition names allowed in LLM output."""
 
+from logillm.grounding import Comparison
 from logillm.logic.formula import And, Formula, Implies, Not, Var
 from logillm.logic.semantics import collect_variables
-from logillm.rules import Comparison
 
 smanjena_vidljivost = Var("smanjena_vidljivost")
 blizu = Var("blizu")
@@ -47,14 +46,14 @@ ACTION_VARS = frozenset({"hitno_kocenje", "usporavanje_potrebno", "tempomat_dozv
 PERMISSION_VARS = frozenset({"tempomat_dozvoljen"})
 REQUESTABLE_VARS = PERMISSION_VARS
 
-VOCABULARY = SITUATION_VARS | REQUEST_CONTEXT_VARS | DERIVED_VARS | ASSESSMENT_VARS | ACTION_VARS
-QUERY_TARGETS = VOCABULARY - REQUEST_CONTEXT_VARS
+PROPOSITION_NAMES = SITUATION_VARS | REQUEST_CONTEXT_VARS | DERIVED_VARS | ASSESSMENT_VARS | ACTION_VARS
+QUERY_TARGETS = PROPOSITION_NAMES - REQUEST_CONTEXT_VARS
 
 
-def validate_vocabulary() -> None:
-    """Validate the boundaries between sensor facts, derived facts and decisions."""
+def validate_knowledge_base() -> None:
+    """Validate the boundaries between sensor propositions, derived propositions and decisions."""
     categories = (SITUATION_VARS, REQUEST_CONTEXT_VARS, DERIVED_VARS, ASSESSMENT_VARS, ACTION_VARS)
-    if sum(len(category) for category in categories) != len(VOCABULARY):
+    if sum(len(category) for category in categories) != len(PROPOSITION_NAMES):
         raise ValueError("Knowledge-base categories must not overlap.")
     if not PERMISSION_VARS <= ACTION_VARS:
         raise ValueError("Every permission variable must describe an action.")
@@ -68,9 +67,9 @@ def validate_vocabulary() -> None:
         )
 
     kb_vars = set(collect_variables(KB))
-    if kb_vars != VOCABULARY:
+    if kb_vars != PROPOSITION_NAMES:
         raise ValueError(
-            f"Vocabulary and knowledge base disagree. "
-            f"Only in KB: {sorted(kb_vars - VOCABULARY)}. "
-            f"Only in vocabulary: {sorted(VOCABULARY - kb_vars)}."
+            f"Proposition names and knowledge base disagree. "
+            f"Only in KB: {sorted(kb_vars - PROPOSITION_NAMES)}. "
+            f"Only in proposition names: {sorted(PROPOSITION_NAMES - kb_vars)}."
         )

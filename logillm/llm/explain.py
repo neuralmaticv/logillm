@@ -21,7 +21,7 @@ def explain(
     evidence: list[str],
     config: LLMConfig | None = None,
 ) -> str:
-    """Turns a verdict plus its supporting facts into a sentence for the driver."""
+    """Turn a verdict and its supporting evidence into a sentence for the driver."""
     lines = "\n".join(f"- {item}" for item in evidence) or "- (nema dodatnih podataka)"
     user = f"Vozač je rekao: {utterance}\nOdluka sistema: {verdict}\nNa čemu se odluka zasniva:\n{lines}"
     return ask(SYSTEM, user, config=config, temperature=0.3)

@@ -6,9 +6,10 @@ ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 
 
 def load_env(path: Path = ENV_FILE) -> None:
-    """Reads KEY=VALUE lines from .env file and sets them in os.environ if not already set"""
+    """Load KEY=VALUE pairs without replacing variables already in the environment."""
     if not path.is_file():
         return
+
     for raw in path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
@@ -44,7 +45,7 @@ def _required(name: str, provider: str) -> str:
 
 
 def llm_config(provider: str | None = None) -> LLMConfig:
-    """Builds the configuration for one provider: 'local' (vLLM) or 'openai'."""
+    """Build configuration for the local vLLM or OpenAI provider."""
     load_env()
     provider = (provider or os.environ.get("LOGILLM_LLM_PROVIDER", "local")).lower()
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from logillm.logic.formula import And, Formula, Implies, Not, Or, Var
-from logillm.logic.semantics import Valuation, consistency, variables
+from logillm.logic.semantics import Valuation, check_consistency, variables
 
 
 @dataclass(frozen=True)
@@ -11,8 +11,8 @@ class Step:
     value: bool
 
 
-def holds(formula: Formula, known: Valuation) -> bool:
-    """True when what is already known makes the formula true.
+def is_established(formula: Formula, known: Valuation) -> bool:
+    """Return whether the known values establish a formula as true.
 
     A variable with no known value counts as not established.
     """
@@ -22,29 +22,30 @@ def holds(formula: Formula, known: Valuation) -> bool:
         case Not(Var(name)):
             return known.get(name) is False
         case And(left, right):
-            return holds(left, known) and holds(right, known)
+            return is_established(left, known) and is_established(right, known)
         case Or(left, right):
-            return holds(left, known) or holds(right, known)
+            return is_established(left, known) or is_established(right, known)
         case _:
             raise TypeError(f"Forward chaining cannot use {type(formula).__name__} in a rule body.")
 
 
 def _rule_parts(rule: Formula) -> tuple[Formula, str, bool] | None:
-    """Splits a rule into body, derived variable and its value, if it is usable."""
+    """Split a usable rule into its body, derived variable and truth value."""
     match rule:
         case Implies(body, Var(name)):
             return body, name, True
         case Implies(body, Not(Var(name))):
             return body, name, False
+
     return None
 
 
 def derive(kb: list[Formula], facts: Valuation, max_passes: int = 20) -> tuple[Valuation, list[Step]]:
-    """Forward chaining: repeats passes over the rules until nothing new appears.
+    """Apply forward chaining until no new values can be derived.
 
-    Returns everything now known, and the ordered steps that got there. Only
-    rules of the form `body -> variable` are usable, which is what the ADAS
-    knowledge base is made of. max_passes stops a rule that feeds itself.
+    Return all known values and the ordered steps that produced them. Only rules
+    of the form `body -> variable` are usable. `max_passes` is a safety bound on
+    the number of passes through the knowledge base.
     """
     known = dict(facts)
     trace: list[Step] = []
@@ -56,7 +57,7 @@ def derive(kb: list[Formula], facts: Valuation, max_passes: int = 20) -> tuple[V
             if parts is None:
                 continue
             body, name, value = parts
-            if name in known or not holds(body, known):
+            if name in known or not is_established(body, known):
                 continue
             known[name] = value
             trace.append(Step(rule, name, value))
@@ -67,8 +68,8 @@ def derive(kb: list[Formula], facts: Valuation, max_passes: int = 20) -> tuple[V
     return known, trace
 
 
-def relevant(steps: list[Step], target: str) -> list[Step]:
-    """Keeps only the steps the target actually depends on.
+def relevant_steps(steps: list[Step], target: str) -> list[Step]:
+    """Keep only the derivation steps on which the target depends.
 
     Walks the trace backwards from the target, collecting every step whose
     result is still needed. Rules that fired but led elsewhere are dropped.
@@ -85,7 +86,7 @@ def relevant(steps: list[Step], target: str) -> list[Step]:
 
 
 def blocking_conditions(kb: list[Formula], target: str, known: Valuation) -> set[str]:
-    """Conditions that stand between what is known and the target"""
+    """Collect unestablished conditions along rule paths leading to the target."""
 
     def walk(name: str, seen: frozenset[str]) -> set[str]:
         if known.get(name) is True:
@@ -108,19 +109,21 @@ def blocking_conditions(kb: list[Formula], target: str, known: Valuation) -> set
 
 
 def conflict_core(formulas: list[Formula]) -> list[Formula]:
-    """The formulas that make a set contradictory, with the rest removed.
+    """Return a subset-minimal group of formulas responsible for inconsistency.
 
-    Drops one formula at a time and keeps the drop whenever the contradiction
-    survives without it. Returns an empty list for a set that is consistent.
+    Remove one formula at a time while the inconsistency survives. The result
+    depends on input order and need not have minimum cardinality. Return an empty
+    list when the complete set is consistent.
     """
-    if consistency(formulas).consistent:
+    if check_consistency(formulas).consistent:
         return []
 
     core = list(formulas)
     index = len(core) - 1
+
     while index >= 0:
         candidate = core[:index] + core[index + 1 :]
-        if not consistency(candidate).consistent:
+        if not check_consistency(candidate).consistent:
             core = candidate
         index -= 1
 

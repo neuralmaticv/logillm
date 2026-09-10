@@ -4,7 +4,7 @@ import sys
 from collections.abc import Sequence
 
 from logillm.config import llm_config
-from logillm.facts import Facts
+from logillm.grounding import SensorReadings
 from logillm.llm.validate import ValidationError
 from logillm.pipeline import PipelineResult, run_pipeline
 
@@ -84,20 +84,20 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _facts(args: argparse.Namespace) -> Facts:
-    facts: Facts = {
+def _readings(args: argparse.Namespace) -> SensorReadings:
+    readings: SensorReadings = {
         "udaljenost": args.udaljenost,
         "relativna_brzina": args.relativna_brzina,
         "vidljivost": args.vidljivost,
     }
     if args.ogranicenje_brzine is not None:
-        facts["ogranicenje_brzine"] = args.ogranicenje_brzine
-    return facts
+        readings["ogranicenje_brzine"] = args.ogranicenje_brzine
+    return readings
 
 
 def _print_result(result: PipelineResult) -> None:
-    print("\nLLM izlaz")
-    print(f"  {result.translation.strip()}")
+    print("\nStrukturirani LLM izlaz")
+    print(f"  {result.structured_output.strip()}")
     print("\nValidirani upit")
     print(f"  vrsta: {result.query.mode}")
     print(f"  cilj:  {result.query.target}")
@@ -122,7 +122,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         config = llm_config(args.provider)
-        result = run_pipeline(args.upit, _facts(args), config)
+        result = run_pipeline(args.upit, _readings(args), config)
     except (ValidationError, TypeError, ValueError, RuntimeError) as error:
         print(f"Greška: {error}", file=sys.stderr)
         return 1

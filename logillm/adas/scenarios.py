@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 
-from logillm.facts import Facts
+from logillm.grounding import SensorReadings
 
 
 @dataclass(frozen=True)
 class Scenario:
     description: str
-    facts: Facts
+    readings: SensorReadings
 
 
 SMANJENA_VIDLJIVOST_I_RIZIK = Scenario(

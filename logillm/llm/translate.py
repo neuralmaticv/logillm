@@ -25,6 +25,7 @@ EXAMPLES: list[tuple[str, dict]] = [
 
 
 def build_system_prompt() -> str:
+    """Build instructions and examples for structured query extraction."""
     targets = ", ".join(sorted(QUERY_TARGETS))
     requestable = ", ".join(sorted(REQUESTABLE_VARS))
     examples = "\n\n".join(
@@ -61,9 +62,9 @@ When a target speed is present:
 Examples:
 
 {examples}"""
-
     return prompt
 
 
 def translate(text: str, config: LLMConfig | None = None) -> str:
+    """Translate a driver's utterance into the JSON expected by validation."""
     return ask(build_system_prompt(), text, config=config, temperature=0.0)

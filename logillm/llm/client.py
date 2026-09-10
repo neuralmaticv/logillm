@@ -11,7 +11,7 @@ def ask(
     config: LLMConfig | None = None,
     temperature: float = 0.0,
 ) -> str:
-    """Sends one chat request and returns the assistant's reply.
+    """Send one chat request and return the assistant's reply.
 
     Works with any OpenAI-compatible endpoint.
     Pass config explicitly to run the same prompt against different models.

@@ -5,23 +5,22 @@ from logillm.adas.knowledge_base import (
     SENSOR_THRESHOLDS,
     hitno_kocenje,
     losi_uslovi,
-    nivo_kritican,
-    nivo_visok,
+    rizik_sudara,
     smanjena_vidljivost,
     tempomat_dozvoljen,
+    trazena_brzina_iznad_ogranicenja,
     usporavanje_potrebno,
-    validate_vocabulary,
+    validate_knowledge_base,
 )
 from logillm.adas.scenarios import ALL_SCENARIOS
-from logillm.facts import Facts, ThreatLevel
-from logillm.grounding import ground
+from logillm.grounding import SensorReadings, ground
 from logillm.logic.formula import Formula, Implies
 from logillm.logic.semantics import (
-    as_formulas,
-    consistency,
+    check_consistency,
     entails,
     format_valuation,
     truth_table,
+    valuation_to_formulas,
 )
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -33,16 +32,13 @@ def section(title: str) -> None:
     print("-" * len(title))
 
 
-def premises_for(facts: Facts) -> list[Formula]:
-    return [*KB, *as_formulas(ground(SENSOR_THRESHOLDS, facts))]
-
-
-def threat_level(premises: list[Formula]) -> ThreatLevel:
-    if entails(premises, nivo_kritican).entailed:
-        return ThreatLevel.CRITICAL
-    if entails(premises, nivo_visok).entailed:
-        return ThreatLevel.HIGH
-    return ThreatLevel.LOW
+def premises_for(readings: SensorReadings) -> list[Formula]:
+    request_context = {trazena_brzina_iznad_ogranicenja.name: False}
+    return [
+        *KB,
+        *valuation_to_formulas(ground(SENSOR_THRESHOLDS, readings)),
+        *valuation_to_formulas(request_context),
+    ]
 
 
 def show_truth_table(formula: Formula) -> None:
@@ -67,7 +63,7 @@ def show_entailment(premises: list[Formula], conclusion: Formula, title: str) ->
 
 def show_consistency(premises: list[Formula], request: Formula, title: str) -> None:
     section(title)
-    result = consistency([*premises, request])
+    result = check_consistency([*premises, request])
     print(f"  zahtjev: {request}")
 
     if result.consistent:
@@ -78,29 +74,38 @@ def show_consistency(premises: list[Formula], request: Formula, title: str) -> N
 
 def show_scenarios() -> None:
     for scenario in ALL_SCENARIOS:
-        facts = scenario.facts
-        valuation = ground(SENSOR_THRESHOLDS, facts)
-        premises = premises_for(facts)
+        readings = scenario.readings
+        valuation = ground(SENSOR_THRESHOLDS, readings)
+        premises = premises_for(readings)
         active = format_valuation(valuation, only_true=True) or "(ništa)"
+        permission_check = check_consistency([*premises, tempomat_dozvoljen])
 
         print(f"\n  {scenario.description}")
-        print(f"    senzori:  {facts}")
+        print(f"    senzori:  {readings}")
         print(f"    važi:     {active}")
-        print(f"    nivo:     {threat_level(premises)}")
         print(f"    kočenje:  {'DA' if entails(premises, hitno_kocenje).entailed else 'ne'}")
         print(f"    uspori:   {'DA' if entails(premises, usporavanje_potrebno).entailed else 'ne'}")
-        print(f"    tempomat: {'SMIJE' if consistency([*premises, tempomat_dozvoljen]).consistent else 'NE SMIJE'}")
+        print(f"    tempomat: {'SMIJE' if permission_check.consistent else 'NE SMIJE'}")
+        if permission_check.model is not None:
+            relevant_names = (
+                losi_uslovi.name,
+                rizik_sudara.name,
+                trazena_brzina_iznad_ogranicenja.name,
+                tempomat_dozvoljen.name,
+            )
+            relevant_model = {name: permission_check.model[name] for name in relevant_names}
+            print(f"    primjer konzistentne dodjele: {format_valuation(relevant_model)}")
 
 
 def main() -> None:
-    validate_vocabulary()
+    validate_knowledge_base()
 
     show_truth_table(Implies(smanjena_vidljivost, losi_uslovi))
     print("  Kada vidljivost nije smanjena, implikacija nije prekršena.")
 
     show_scenarios()
 
-    first_scenario = ALL_SCENARIOS[0].facts
+    first_scenario = ALL_SCENARIOS[0].readings
     show_entailment(
         premises_for(first_scenario),
         hitno_kocenje,

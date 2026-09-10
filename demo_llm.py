@@ -20,17 +20,17 @@ DRIVER_INPUTS = [
 def run(text: str, config) -> None:
     print(f"\nvozač:   {text}")
 
-    raw = translate(text, config=config)
-    print(f"prevod:  {raw.strip()}")
+    structured_output = translate(text, config=config)
+    print(f"strukturirani izlaz: {structured_output.strip()}")
 
     try:
-        query = validate(raw)
+        query = validate(structured_output)
     except ValidationError as error:
         print(f"         ODBIJENO - {error}")
         return
 
     for scenario in LLM_SCENARIOS:
-        decision = decide(query, scenario.facts)
+        decision = decide(query, scenario.readings)
         print(f"\n  {scenario.description}")
         print(f"    presuda:     {decision.verdict}")
         for item in decision.evidence:
