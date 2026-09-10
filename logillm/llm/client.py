@@ -18,15 +18,18 @@ def ask(
     """
     config = config or llm_config()
 
-    payload = {
+    payload: dict[str, object] = {
         "model": config.model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        "temperature": temperature,
         **config.extra_payload,
     }
+
+    if config.send_temperature:
+        payload["temperature"] = temperature
+
     request = urllib.request.Request(
         f"{config.base_url}/chat/completions",
         data=json.dumps(payload).encode(),

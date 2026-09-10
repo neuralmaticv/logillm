@@ -26,6 +26,7 @@ class LLMConfig:
     model: str
     api_key: str | None = None
     extra_payload: dict[str, object] = field(default_factory=dict)
+    send_temperature: bool = True
 
     @property
     def headers(self) -> dict[str, str]:
@@ -62,6 +63,7 @@ def llm_config(provider: str | None = None) -> LLMConfig:
             base_url=os.environ.get("LOGILLM_OPENAI_URL", "https://api.openai.com/v1"),
             model=_required("LOGILLM_OPENAI_MODEL", "openai"),
             api_key=_required("OPENAI_API_KEY", "openai"),
+            send_temperature=False,
         )
 
     raise ValueError(f"Unknown provider '{provider}'. Use 'local' or 'openai'.")
