@@ -18,6 +18,37 @@ Izjava korisnika prolazi odvojenim putem. LLM je pretvara u strukturirani upit k
 
 Uz odluku se čuva i formalni osnov, kao što su relevantni koraci izvođenja, protivprimjer ili konfliktna pravila. LLM taj već utvrđeni rezultat samo pretvara u kratko objašnjenje razumljivo korisniku.
 
+## Primjer
+
+Ista rečenica vozača, dva različita očitavanja senzora. Prevod je u oba slučaja identičan; presudu mijenjaju senzori.
+
+```text
+vozač:   Treba li da kočim?
+prevod:  {"mode": "claim", "target": "hitno_kocenje"}
+
+  magla, vozilo ispred koči
+    presuda:     MORA VAŽITI
+    osnov:       senzori pokazuju: blizu, koci_ispred, magla
+    osnov:       (magla -> smanjena_vidljivost)
+    osnov:       (smanjena_vidljivost -> losi_uslovi)
+    osnov:       ((blizu & koci_ispred) -> rizik_sudara)
+    osnov:       ((rizik_sudara & losi_uslovi) -> nivo_kritican)
+    osnov:       (nivo_kritican -> hitno_kocenje)
+    objašnjenje: Usmeri se na kočenje jer je pred tobom vozilo u magli. Ovo je hitno potrebno da izbegneš sudar u ovim lošim uslovima.
+
+  vedro, put slobodan
+    presuda:     NE MORA VAŽITI
+    osnov:       senzori pokazuju: (ništa posebno)
+    osnov:       moguć je slučaj u kojem važi samo: (ništa)
+    objašnjenje: Ne moraš kočiti jer senzori ne pokazuju ništa posebno. Nastavi vožnju bez ikakvih promena brzine.
+```
+
+Šta se iz ovoga vidi:
+
+- **Zaključak je izveden u pet koraka.** Nijedno pravilo ne povezuje maglu i kočenje neposredno; taj put nastaje uzastopnom primjenom pravila iz baze znanja.
+- **Objašnjenje se zasniva isključivo na navedenom osnovu.** LLM dobija odluku i pravila koja su do nje dovela, bez mogućnosti da ih dopuni ili izmijeni.
+- **Presuda je deterministička, za razliku od objašnjenja.** Ponovno pokretanje istog scenarija daje istu odluku, dok se tekst objašnjenja može razlikovati.
+
 ## Preduslovi
 
 ### Logički sloj
