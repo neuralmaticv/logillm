@@ -16,3 +16,10 @@ package = true
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# E,F = pycodestyle/pyflakes (osnovne greške)
+# I   = sortiranje importova
+# UP  = pyupgrade (moderniji sintaksni oblici)
+# B   = flake8-bugbear (česte logičke zamke)

@@ -49,7 +49,7 @@ def collect_variables(formulas: Iterable[Formula]) -> list[str]:
 def all_valuations(names: Iterable[str]) -> Iterator[Valuation]:
     ordered = list(names)
     for combination in product([False, True], repeat=len(ordered)):
-        yield dict(zip(ordered, combination))
+        yield dict(zip(ordered, combination, strict=True))
 
 
 def as_formulas(valuation: Valuation) -> list[Formula]:
