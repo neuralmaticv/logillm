@@ -8,5 +8,11 @@ dependencies = [
     "ruff>=0.15.20",
 ]
 
+[project.scripts]
+logillm = "logillm.cli:main"
+
+[tool.uv]
+package = true
+
 [tool.ruff]
 line-length = 120

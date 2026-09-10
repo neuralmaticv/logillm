@@ -103,22 +103,36 @@ Za lokalni LLM potrebno je podesiti adresu vLLM servera i naziv modela. Za OpenA
 
 ## Pokretanje
 
+CLI je glavni entry point za pokretanje cijelog pipelinea nad jednom izjavom korisnika i jednim skupom senzorskih očitavanja:
+
 ```bash
-uv run demo_logic.py    # logičko jezgro: posljedica, protivprimjer, zadovoljivost
-uv run demo_llm.py      # cijeli pipeline, zahtijeva LLM server
+uv run logillm "Treba li da kočim?" \
+  --udaljenost 8 \
+  --relativna-brzina 9 \
+  --vidljivost 30
 ```
 
-`demo_llm.py` prihvata provajdera kao argument, inače uzima `LOGILLM_LLM_PROVIDER` iz `.env`:
+Provider se podrazumijevano čita iz `.env`, a za pojedinačno pokretanje može se zadati argumentom `--provider local|openai`. Na primjer, za lokalni LLM:
 
 ```bash
+uv run logillm "Uključi tempomat." \
+  --udaljenost 60 \
+  --relativna-brzina 0 \
+  --vidljivost 500 \
+  --provider local
+```
+
+Spisak svih argumenata:
+
+```bash
+uv run logillm --help
+```
+
+Postojeće demo skripte za unaprijed definisane primjere:
+
+```bash
+uv run demo_logic.py
 uv run demo_llm.py local
-uv run demo_llm.py openai
-```
-
-Provjera da je LLM server dostupan i pod kojim imenom očekuje model:
-
-```bash
-curl http://<ip-servera>:8111/v1/models
 ```
 
 Provjera koda:
