@@ -44,13 +44,17 @@ def _required(name: str, provider: str) -> str:
     return value
 
 
-def llm_config(provider: str | None = None) -> LLMConfig:
-    """Build configuration for the local vLLM or OpenAI provider."""
+def llm_config(provider: str | None = None, thinking: bool | None = None) -> LLMConfig:
+    """Build configuration for the local vLLM or OpenAI provider.
+
+    thinking overrides LOGILLM_LOCAL_THINKING for the local provider when given.
+    """
     load_env()
     provider = (provider or os.environ.get("LOGILLM_LLM_PROVIDER", "local")).lower()
 
     if provider == "local":
-        thinking = os.environ.get("LOGILLM_LOCAL_THINKING", "0") == "1"
+        if thinking is None:
+            thinking = os.environ.get("LOGILLM_LOCAL_THINKING", "0") == "1"
         return LLMConfig(
             provider="local",
             base_url=os.environ.get("LOGILLM_LOCAL_URL", "http://127.0.0.1:8111/v1"),
