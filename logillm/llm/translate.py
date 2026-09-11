@@ -1,8 +1,12 @@
 import json
+from dataclasses import dataclass
 
 from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS
 from logillm.config import LLMConfig
-from logillm.llm.client import ask
+from logillm.llm.client import Message, chat
+from logillm.llm.validate import Query, ValidationError, validate
+
+MAX_ATTEMPTS = 3
 
 EXAMPLES: list[tuple[str, dict]] = [
     ("Uključi tempomat.", {"mode": "request", "target": "tempomat_dozvoljen"}),
@@ -22,6 +26,26 @@ EXAMPLES: list[tuple[str, dict]] = [
     ("Da li su uslovi za vožnju loši?", {"mode": "claim", "target": "losi_uslovi"}),
     ("Postoji li opasnost od sudara?", {"mode": "claim", "target": "rizik_sudara"}),
 ]
+
+FEEDBACK = """Your reply was rejected by the validator: {error}
+Translate the driver's utterance again and answer with a single corrected JSON object and nothing else."""
+
+
+@dataclass(frozen=True)
+class Rejection:
+    """A reply that failed validation and the error sent back to the model."""
+
+    reply: str
+    error: str
+
+
+@dataclass(frozen=True)
+class Translation:
+    """The accepted reply, its validated query and the replies rejected before it."""
+
+    reply: str
+    query: Query
+    rejections: tuple[Rejection, ...]
 
 
 def build_system_prompt() -> str:
@@ -65,6 +89,33 @@ Examples:
     return prompt
 
 
-def translate(text: str, config: LLMConfig | None = None) -> str:
-    """Translate a driver's utterance into the JSON expected by validation."""
-    return ask(build_system_prompt(), text, config=config, temperature=0.0)
+def translate(text: str, config: LLMConfig | None = None, max_attempts: int = MAX_ATTEMPTS) -> Translation:
+    """Translate a driver's utterance into a validated query.
+
+    A reply that fails validation is sent back to the model together with the
+    validation error, so the model can correct it in the next attempt. Raise
+    ValidationError when none of the attempts produces a valid reply.
+    """
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1.")
+
+    messages: list[Message] = [
+        {"role": "system", "content": build_system_prompt()},
+        {"role": "user", "content": text},
+    ]
+    rejections: list[Rejection] = []
+
+    for _ in range(max_attempts):
+        reply = chat(messages, config=config, temperature=0.0)
+        try:
+            query = validate(reply)
+        except ValidationError as error:
+            rejections.append(Rejection(reply, str(error)))
+            messages += [
+                {"role": "assistant", "content": reply},
+                {"role": "user", "content": FEEDBACK.format(error=error)},
+            ]
+        else:
+            return Translation(reply, query, tuple(rejections))
+
+    raise ValidationError(f"No valid reply after {max_attempts} attempts. Last error: {rejections[-1].error}")

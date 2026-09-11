@@ -10,8 +10,8 @@ from logillm.adas.knowledge_base import (
 from logillm.config import LLMConfig
 from logillm.grounding import SensorReadings, ground
 from logillm.llm.explain import explain
-from logillm.llm.translate import translate
-from logillm.llm.validate import Query, validate
+from logillm.llm.translate import Rejection, translate
+from logillm.llm.validate import Query
 from logillm.logic.derivation import Step, blocking_conditions, conflict_core, derive, relevant_steps
 from logillm.logic.formula import Formula, Implies, Var
 from logillm.logic.semantics import Valuation, check_consistency, entails, valuation_to_formulas, variables
@@ -30,6 +30,7 @@ class PipelineResult:
     decision: Decision
     explanation: str | None
     explanation_error: str | None = None
+    rejections: tuple[Rejection, ...] = ()
 
 
 def _names(items) -> str:
@@ -137,8 +138,8 @@ def decide(query: Query, readings: SensorReadings) -> Decision:
 def run_pipeline(utterance: str, readings: SensorReadings, config: LLMConfig) -> PipelineResult:
     """Run structured extraction, validation, formal evaluation and explanation."""
     validate_knowledge_base()
-    structured_output = translate(utterance, config=config)
-    query = validate(structured_output)
+    translation = translate(utterance, config=config)
+    query = translation.query
     decision = decide(query, readings)
 
     try:
@@ -149,5 +150,5 @@ def run_pipeline(utterance: str, readings: SensorReadings, config: LLMConfig) ->
             config=config,
         ).strip()
     except (RuntimeError, TypeError) as error:
-        return PipelineResult(structured_output, query, decision, None, str(error))
-    return PipelineResult(structured_output, query, decision, explanation)
+        return PipelineResult(translation.reply, query, decision, None, str(error), translation.rejections)
+    return PipelineResult(translation.reply, query, decision, explanation, rejections=translation.rejections)

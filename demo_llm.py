@@ -4,7 +4,7 @@ from logillm.adas.scenarios import LLM_SCENARIOS
 from logillm.config import llm_config
 from logillm.llm.explain import explain
 from logillm.llm.translate import translate
-from logillm.llm.validate import ValidationError, validate
+from logillm.llm.validate import ValidationError
 from logillm.pipeline import decide
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -18,19 +18,21 @@ DRIVER_INPUTS = [
 
 
 def run(text: str, config) -> None:
-    print(f"\nvozač:   {text}")
-
-    structured_output = translate(text, config=config)
-    print(f"strukturirani izlaz: {structured_output.strip()}")
+    print(f"\nkorisnik:   {text}")
 
     try:
-        query = validate(structured_output)
+        translation = translate(text, config=config)
     except ValidationError as error:
         print(f"         ODBIJENO - {error}")
         return
 
+    for rejection in translation.rejections:
+        print(f"odbijeni izlaz:      {rejection.reply.strip()}")
+        print(f"         greška - {rejection.error}")
+    print(f"strukturirani izlaz: {translation.reply.strip()}")
+
     for scenario in LLM_SCENARIOS:
-        decision = decide(query, scenario.readings)
+        decision = decide(translation.query, scenario.readings)
         print(f"\n  {scenario.description}")
         print(f"    presuda:     {decision.verdict}")
         for item in decision.evidence:

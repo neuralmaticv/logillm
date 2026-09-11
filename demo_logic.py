@@ -122,7 +122,7 @@ def main() -> None:
     show_consistency(
         premises_for(first_scenario),
         tempomat_dozvoljen,
-        "Zahtjev vozača: uključi tempomat",
+        "Zahtjev korisnika: uključi tempomat",
     )
     print()
 

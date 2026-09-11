@@ -4,14 +4,15 @@ import urllib.request
 
 from logillm.config import LLMConfig, llm_config
 
+Message = dict[str, str]
 
-def ask(
-    system: str,
-    user: str,
+
+def chat(
+    messages: list[Message],
     config: LLMConfig | None = None,
     temperature: float = 0.0,
 ) -> str:
-    """Send one chat request and return the assistant's reply.
+    """Send a conversation and return the assistant's next reply.
 
     Works with any OpenAI-compatible endpoint.
     Pass config explicitly to run the same prompt against different models.
@@ -20,10 +21,7 @@ def ask(
 
     payload: dict[str, object] = {
         "model": config.model,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        "messages": messages,
         **config.extra_payload,
     }
 
@@ -54,3 +52,17 @@ def ask(
     if not isinstance(content, str):
         raise TypeError(f"[{config.provider}] LLM response content is not text.")
     return content
+
+
+def ask(
+    system: str,
+    user: str,
+    config: LLMConfig | None = None,
+    temperature: float = 0.0,
+) -> str:
+    """Send a system and a user message and return the assistant's reply."""
+    messages: list[Message] = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
+    return chat(messages, config=config, temperature=temperature)

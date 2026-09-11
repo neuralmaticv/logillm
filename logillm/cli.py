@@ -96,6 +96,11 @@ def _readings(args: argparse.Namespace) -> SensorReadings:
 
 
 def _print_result(result: PipelineResult) -> None:
+    if result.rejections:
+        print("\nOdbijeni LLM izlazi (greška je vraćena modelu)")
+        for number, rejection in enumerate(result.rejections, start=1):
+            print(f"  {number}. {rejection.reply.strip()}")
+            print(f"     greška: {rejection.error}")
     print("\nStrukturirani LLM izlaz")
     print(f"  {result.structured_output.strip()}")
     print("\nValidirani upit")
