@@ -56,32 +56,31 @@ def build_system_prompt() -> str:
         f"Input: {text}\nOutput: {json.dumps(reply, ensure_ascii=False)}" for text, reply in EXAMPLES
     )
 
-    prompt = f"""You are a translator, not an advisor. You turn a driver's utterance,
-spoken in Serbian, into JSON. You never decide anything, never explain, and never
-write any text around the JSON.
+    prompt = f"""Your only task is to convert the driver's utterance, given in Serbo-Croatian,
+into exactly one JSON object. Return only valid JSON. Do not use Markdown, code fences,
+explanation, advice, or any text before or after the JSON.
 
-You are given only what the driver said. You know nothing about the road, the
-weather or the traffic: sensors provide that separately. Your single job is to
-name what the driver is asking about.
+Your task is only to identify what the driver is asking about. The utterance is your
+only input. Road conditions, weather, distance, speed and traffic state come from
+sensors, so never guess them from the utterance and never decide whether something
+is safe, required or allowed.
 
-Field "mode":
-  "claim"   - the driver asks whether something holds or must be done
-  "request" - the driver asks for an action to be carried out
+JSON fields:
 
-Field "target": exactly one name from this list:
-  {targets}
+- "mode":
+  Decide by the form of the utterance, not by its topic.
+  Use "request" when the driver tells the system to do something ("Uključi...",
+  "Postavi...").
+  Use "claim" when the driver asks a question, including whether an action is safe
+  or allowed ("Da li je bezbjedno uključiti tempomat?").
 
-For mode "request", the target must be an action from this list:
-  {requestable}
+- "target":
+  Must be exactly one value from this list: {targets}
+  If "mode" is "request", the target must be one of: {requestable}
 
-Optional field "speed_kmh":
-  Include it only when the driver gives a target speed for cruise control.
-  Its value must be a number expressed in km/h.
-
-Answer with a single JSON object and nothing else:
-{{"mode": "...", "target": "..."}}
-When a target speed is present:
-{{"mode": "...", "target": "tempomat_dozvoljen", "speed_kmh": 100}}
+- "speed_kmh":
+  Optional. Include it only when the driver explicitly gives a requested
+  cruise-control speed. The value must be a number in km/h.
 
 Examples:
 
