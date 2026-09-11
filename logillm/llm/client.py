@@ -6,6 +6,8 @@ from logillm.config import LLMConfig, llm_config
 
 Message = dict[str, str]
 
+TIMEOUT_S = 120
+
 
 def chat(
     messages: list[Message],
@@ -35,7 +37,7 @@ def chat(
     )
 
     try:
-        with urllib.request.urlopen(request, timeout=120) as response:
+        with urllib.request.urlopen(request, timeout=TIMEOUT_S) as response:
             body = json.load(response)
     except json.JSONDecodeError as error:
         raise RuntimeError(f"[{config.provider}] LLM response is not valid JSON.") from error
@@ -44,6 +46,8 @@ def chat(
         raise RuntimeError(f"[{config.provider}] HTTP {error.code}: {detail}") from error
     except urllib.error.URLError as error:
         raise RuntimeError(f"[{config.provider}] cannot reach {config.base_url}: {error.reason}") from error
+    except TimeoutError as error:
+        raise RuntimeError(f"[{config.provider}] no response within {TIMEOUT_S} s.") from error
 
     try:
         content = body["choices"][0]["message"]["content"]

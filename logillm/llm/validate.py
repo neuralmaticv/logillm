@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS, SPEED_TARGETS
 
 MODES = frozenset({"claim", "request"})
+UNSUPPORTED = "unsupported"
 REQUIRED_FIELDS = frozenset({"mode", "target"})
 OPTIONAL_FIELDS = frozenset({"speed_kmh"})
 ALLOWED_FIELDS = REQUIRED_FIELDS | OPTIONAL_FIELDS
@@ -12,6 +13,10 @@ ALLOWED_FIELDS = REQUIRED_FIELDS | OPTIONAL_FIELDS
 
 class ValidationError(Exception):
     """The model returned something the logic layer must not accept."""
+
+
+class UnsupportedQueryError(ValidationError):
+    """The model marked the utterance as outside the supported ADAS queries."""
 
 
 @dataclass(frozen=True)
@@ -87,8 +92,16 @@ def _speed(data: dict, target: str) -> float | None:
 
 
 def validate(raw: str) -> Query:
-    """Convert a raw model reply into a query accepted by the logic layer."""
+    """Convert a raw model reply into a query accepted by the logic layer.
+
+    Raise UnsupportedQueryError when the model marks the utterance as unsupported.
+    """
     data = _parse(raw)
+    if data.get("mode") == UNSUPPORTED:
+        if set(data) != {"mode"}:
+            raise ValidationError(f"A reply with mode {UNSUPPORTED!r} must contain only the 'mode' field.")
+        raise UnsupportedQueryError("The utterance is outside the supported ADAS queries.")
+
     fields = set(data)
     if not REQUIRED_FIELDS <= fields or not fields <= ALLOWED_FIELDS:
         raise ValidationError(
