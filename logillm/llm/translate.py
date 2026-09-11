@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 
-from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS
+from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS, SPEED_TARGETS
 from logillm.config import LLMConfig
 from logillm.llm.client import Message, chat
 from logillm.llm.validate import Query, ValidationError, validate
@@ -13,6 +13,10 @@ EXAMPLES: list[tuple[str, dict]] = [
     (
         "Postavi brzinu na 100 km/h.",
         {"mode": "request", "target": "tempomat_dozvoljen", "speed_kmh": 100},
+    ),
+    (
+        "Ubrzaj na 120 km/h.",
+        {"mode": "request", "target": "ubrzavanje_dozvoljeno", "speed_kmh": 120},
     ),
     (
         "Da li je bezbjedno uključiti tempomat?",
@@ -52,6 +56,7 @@ def build_system_prompt() -> str:
     """Build instructions and examples for structured query extraction."""
     targets = ", ".join(sorted(QUERY_TARGETS))
     requestable = ", ".join(sorted(REQUESTABLE_VARS))
+    speed_targets = ", ".join(sorted(SPEED_TARGETS))
     examples = "\n\n".join(
         f"Input: {text}\nOutput: {json.dumps(reply, ensure_ascii=False)}" for text, reply in EXAMPLES
     )
@@ -70,7 +75,7 @@ JSON fields:
 - "mode":
   Decide by the form of the utterance, not by its topic.
   Use "request" when the driver tells the system to do something ("Uključi...",
-  "Postavi...").
+  "Postavi...", "Ubrzaj...").
   Use "claim" when the driver asks a question, including whether an action is safe
   or allowed ("Da li je bezbjedno uključiti tempomat?").
 
@@ -79,8 +84,8 @@ JSON fields:
   If "mode" is "request", the target must be one of: {requestable}
 
 - "speed_kmh":
-  Optional. Include it only when the driver explicitly gives a requested
-  cruise-control speed. The value must be a number in km/h.
+  Optional. Include it only when the driver explicitly gives a requested speed,
+  and only with these targets: {speed_targets}. The value must be a number in km/h.
 
 Examples:
 

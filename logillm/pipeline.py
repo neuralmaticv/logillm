@@ -2,6 +2,7 @@ import math
 from dataclasses import dataclass
 
 from logillm.adas.knowledge_base import (
+    BAD_CONDITIONS_MAX_SPEED_KMH,
     KB,
     PERMISSION_VARS,
     SENSOR_THRESHOLDS,
@@ -39,7 +40,7 @@ def _names(items) -> str:
 
 def _request_context(query: Query, readings: SensorReadings) -> Valuation:
     if query.speed_kmh is None:
-        return {"trazena_brzina_iznad_ogranicenja": False}
+        return {"trazena_brzina_iznad_ogranicenja": False, "trazena_brzina_iznad_bezbjedne": False}
 
     speed_limit = readings.get("ogranicenje_brzine")
     if (
@@ -48,9 +49,12 @@ def _request_context(query: Query, readings: SensorReadings) -> Valuation:
         or not math.isfinite(speed_limit)
         or speed_limit <= 0
     ):
-        raise ValueError("Za postavljanje brzine tempomata potrebno je navesti pozitivno ograničenje brzine.")
+        raise ValueError("Kada je zadata tražena brzina, potrebno je navesti pozitivno ograničenje brzine.")
 
-    return {"trazena_brzina_iznad_ogranicenja": query.speed_kmh > speed_limit}
+    return {
+        "trazena_brzina_iznad_ogranicenja": query.speed_kmh > speed_limit,
+        "trazena_brzina_iznad_bezbjedne": query.speed_kmh > BAD_CONDITIONS_MAX_SPEED_KMH,
+    }
 
 
 def _speed_evidence(query: Query, readings: SensorReadings) -> tuple[str, ...]:
@@ -61,6 +65,13 @@ def _speed_evidence(query: Query, readings: SensorReadings) -> tuple[str, ...]:
         f"tražena brzina: {query.speed_kmh:g} km/h",
         f"ograničenje brzine: {speed_limit:g} km/h",
     )
+
+
+def _safe_speed_evidence(core: list[Formula]) -> tuple[str, ...]:
+    """Return the safe speed for bad conditions when it takes part in the conflict."""
+    if any("trazena_brzina_iznad_bezbjedne" in variables(formula) for formula in core):
+        return (f"bezbjedna brzina po lošim uslovima: {BAD_CONDITIONS_MAX_SPEED_KMH:g} km/h",)
+    return ()
 
 
 def _entailed_evidence(valuation: Valuation, trace: list[Step], target: str) -> tuple[str, ...]:
@@ -125,7 +136,8 @@ def decide(query: Query, readings: SensorReadings) -> Decision:
                 (*speed_evidence, "nijedno pravilo to ne zabranjuje u ovoj situaciji"),
             )
         core = conflict_core([*premises, target])
-        return Decision("NE SMIJE", (*speed_evidence, *_refused_evidence(core, valuation)))
+        evidence = (*speed_evidence, *_safe_speed_evidence(core), *_refused_evidence(core, valuation))
+        return Decision("NE SMIJE", evidence)
 
     if query.mode == "claim":
         if entails(premises, target).entailed:

@@ -9,6 +9,7 @@ blizu = Var("blizu")
 veoma_blizu = Var("veoma_blizu")
 brzo_priblizavanje = Var("brzo_priblizavanje")
 trazena_brzina_iznad_ogranicenja = Var("trazena_brzina_iznad_ogranicenja")
+trazena_brzina_iznad_bezbjedne = Var("trazena_brzina_iznad_bezbjedne")
 losi_uslovi = Var("losi_uslovi")
 rizik_sudara = Var("rizik_sudara")
 nivo_visok = Var("nivo_visok")
@@ -16,6 +17,7 @@ nivo_kritican = Var("nivo_kritican")
 hitno_kocenje = Var("hitno_kocenje")
 usporavanje_potrebno = Var("usporavanje_potrebno")
 tempomat_dozvoljen = Var("tempomat_dozvoljen")
+ubrzavanje_dozvoljeno = Var("ubrzavanje_dozvoljeno")
 
 KB: list[Formula] = [
     Implies(smanjena_vidljivost, losi_uslovi),
@@ -29,6 +31,9 @@ KB: list[Formula] = [
     Implies(losi_uslovi, Not(tempomat_dozvoljen)),
     Implies(rizik_sudara, Not(tempomat_dozvoljen)),
     Implies(trazena_brzina_iznad_ogranicenja, Not(tempomat_dozvoljen)),
+    Implies(blizu, Not(ubrzavanje_dozvoljeno)),
+    Implies(And(losi_uslovi, trazena_brzina_iznad_bezbjedne), Not(ubrzavanje_dozvoljeno)),
+    Implies(trazena_brzina_iznad_ogranicenja, Not(ubrzavanje_dozvoljeno)),
 ]
 
 SENSOR_THRESHOLDS: dict[str, list[Comparison]] = {
@@ -38,13 +43,17 @@ SENSOR_THRESHOLDS: dict[str, list[Comparison]] = {
     "smanjena_vidljivost": [Comparison("vidljivost", "<", 50)],
 }
 
+# highest requested speed that still allows acceleration in bad conditions
+BAD_CONDITIONS_MAX_SPEED_KMH = 50
+
 SITUATION_VARS = frozenset({"smanjena_vidljivost", "blizu", "veoma_blizu", "brzo_priblizavanje"})
-REQUEST_CONTEXT_VARS = frozenset({"trazena_brzina_iznad_ogranicenja"})
+REQUEST_CONTEXT_VARS = frozenset({"trazena_brzina_iznad_ogranicenja", "trazena_brzina_iznad_bezbjedne"})
 DERIVED_VARS = frozenset({"losi_uslovi", "rizik_sudara"})
 ASSESSMENT_VARS = frozenset({"nivo_visok", "nivo_kritican"})
-ACTION_VARS = frozenset({"hitno_kocenje", "usporavanje_potrebno", "tempomat_dozvoljen"})
-PERMISSION_VARS = frozenset({"tempomat_dozvoljen"})
+ACTION_VARS = frozenset({"hitno_kocenje", "usporavanje_potrebno", "tempomat_dozvoljen", "ubrzavanje_dozvoljeno"})
+PERMISSION_VARS = frozenset({"tempomat_dozvoljen", "ubrzavanje_dozvoljeno"})
 REQUESTABLE_VARS = PERMISSION_VARS
+SPEED_TARGETS = frozenset({"tempomat_dozvoljen", "ubrzavanje_dozvoljeno"})
 
 PROPOSITION_NAMES = SITUATION_VARS | REQUEST_CONTEXT_VARS | DERIVED_VARS | ASSESSMENT_VARS | ACTION_VARS
 QUERY_TARGETS = PROPOSITION_NAMES - REQUEST_CONTEXT_VARS
@@ -57,6 +66,8 @@ def validate_knowledge_base() -> None:
         raise ValueError("Knowledge-base categories must not overlap.")
     if not PERMISSION_VARS <= ACTION_VARS:
         raise ValueError("Every permission variable must describe an action.")
+    if not SPEED_TARGETS <= PERMISSION_VARS:
+        raise ValueError("Every speed target must be a permission variable.")
 
     threshold_vars = set(SENSOR_THRESHOLDS)
     if threshold_vars != SITUATION_VARS:

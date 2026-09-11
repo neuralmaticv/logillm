@@ -2,6 +2,7 @@ import sys
 
 from logillm.adas.knowledge_base import (
     KB,
+    REQUEST_CONTEXT_VARS,
     SENSOR_THRESHOLDS,
     hitno_kocenje,
     losi_uslovi,
@@ -33,7 +34,7 @@ def section(title: str) -> None:
 
 
 def premises_for(readings: SensorReadings) -> list[Formula]:
-    request_context = {trazena_brzina_iznad_ogranicenja.name: False}
+    request_context = {name: False for name in REQUEST_CONTEXT_VARS}
     return [
         *KB,
         *valuation_to_formulas(ground(SENSOR_THRESHOLDS, readings)),

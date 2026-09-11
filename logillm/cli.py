@@ -74,7 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--ogranicenje-brzine",
         type=_positive_float,
-        help="ograničenje brzine u km/h; obavezno kada korisnik zadaje brzinu tempomata",
+        help="ograničenje brzine u km/h; obavezno kada korisnik zadaje traženu brzinu",
     )
     parser.add_argument(
         "--provider",

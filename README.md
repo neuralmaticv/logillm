@@ -124,7 +124,7 @@ Spisak svih argumenata:
 uv run logillm --help
 ```
 
-Zahtjev za postavljanje brzine tumači se kao podešavanje tempomata. LLM izdvaja traženu brzinu, dok formalni sloj odlučuje da li je ona dozvoljena u odnosu na ograničenje i trenutno stanje:
+Zahtjev za postavljanje brzine tumači se kao podešavanje tempomata, a zahtjev za ubrzavanje ("Ubrzaj na 120 km/h.") kao posebna radnja. U oba slučaja LLM izdvaja traženu brzinu, dok formalni sloj odlučuje da li je ona dozvoljena u odnosu na ograničenje i trenutno stanje:
 
 ```bash
 uv run logillm "Postavi brzinu na 100 km/h." \

@@ -2,13 +2,12 @@ import json
 import math
 from dataclasses import dataclass
 
-from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS
+from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS, SPEED_TARGETS
 
 MODES = frozenset({"claim", "request"})
 REQUIRED_FIELDS = frozenset({"mode", "target"})
 OPTIONAL_FIELDS = frozenset({"speed_kmh"})
 ALLOWED_FIELDS = REQUIRED_FIELDS | OPTIONAL_FIELDS
-SPEED_TARGETS = frozenset({"tempomat_dozvoljen"})
 
 
 class ValidationError(Exception):
