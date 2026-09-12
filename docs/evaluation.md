@@ -15,7 +15,7 @@ Mjerenja su rađena u dvije iteracije, jer je strukturirani izlaz LLM-a u međuv
 | | iteracija 1 | iteracija 2 |
 |---|---|---|
 | format izlaza | `{"mode": "claim", "target": "rizik_sudara"}` | `claim rizik_sudara` |
-| sistemski prompt, prevod | ~704 tokena | 513 tokena |
+| sistemski prompt, prevod | ~704 tokena | 546 tokena |
 | konfiguracije | `local`, `local-thinking`, `openai` | `local`, `openai` |
 | ponavljanja | 1 po konfiguraciji | 5 za stress skup |
 | potrošnja tokena | procijenjena | izmjerena iz `usage` |
@@ -90,18 +90,18 @@ Glavni skup, jedno pokretanje:
 | | local | openai |
 |---|---|---|
 | tačan upit | **15/15** | **15/15** |
-| latencija, medijan | 0.32 s | 0.96 s |
-| latencija, p95 | 0.43 s | 2.26 s |
+| latencija, medijan | 0.34 s | 0.82 s |
+| latencija, p95 | 0.43 s | 1.22 s |
 
 Stress skup, **pet ponovljenih pokretanja**:
 
 | | local | openai |
 |---|---|---|
-| složeniji validni | **100%** (9/9, svih 5 puta) | 88.9% (8/9) |
-| odbijeni | **100%** (11/11, svih 5 puta) | 90.9–100% |
-| latencija, medijan | 0.21 s | 0.85 s |
-| latencija, p95 | 0.41 s | 1.47 s |
-| latencija, max | 0.51 s | 2.14 s |
+| složeniji validni | **100%** (9/9, svih 5 puta) | **100%** (9/9, svih 5 puta) |
+| odbijeni | 90.9% (10/11, svih 5 puta) | **100%** (11/11, svih 5 puta) |
+| latencija, medijan | 0.27 s | 0.83 s |
+| latencija, p95 | 0.42 s | 1.39 s |
+| latencija, max | 0.49 s | 1.96 s |
 
 Percentili su računati na objedinjenih 100 mjerenja po konfiguraciji (5 pokretanja × 20 slučajeva).
 
@@ -111,40 +111,59 @@ Vrijednosti dolaze iz `usage` polja u odgovoru servera. Navedena je medijana, a 
 
 | poziv | prompt | izlaz | ukupno |
 |---|---|---|---|
-| prevod, `local` (n=15) | 513 (511–517) | 8 (6–12) | **520** (518–529) |
-| prevod, `openai` (n=15) | 487 (484–488) | 10 (8–12) | **496** (494–500) |
+| prevod, `local` (n=15) | 546 (544–550) | 8 (6–12) | **553** (551–562) |
+| prevod, `openai` (n=15) | 519 (516–520) | 10 (8–63) | **529** (526–580) |
+| objašnjenje, `local` (n=10) | 269 (235–312) | 35 (20–56) | **305** (260–354) |
 
 Kompaktni format smanjuje broj izlaznih tokena jer model više ne generiše JSON, nego kratku liniju oblika `claim rizik_sudara`. U prvoj iteraciji JSON izlaz je tipično bio oko 20 tokena, dok je u drugoj iteraciji izlaz prevoda smanjen na 8 tokena za lokalni model i 10 tokena za OpenAI profil.
 
 Veći dio ukupne potrošnje dolazi iz prompta, ali latenciju posebno povećava duži izlaz jer se odgovor generiše token po token. Zato je za ovaj zadatak korisno držati izlaz što kraćim. Kada se uračunaju i prevod i objašnjenje, jedan prolazak kroz pipeline na `local` profilu troši **oko 820 tokena**.
 
-### Determinizam prevoda
+### Stabilnost prevoda
 
 Pet pokretanja istog stress skupa:
 
 | | local | openai |
 |---|---|---|
 | temperatura | 0.0 | 1.0 (model ne dopušta 0) |
-| rezultat kroz 5 pokretanja | **identičan** | varirao |
+| rezultat kroz 5 pokretanja | **identičan** | **identičan** |
 
-Za `openai` profil nije bilo moguće forsirati `temperature=0`, pa je korištena podrazumijevana vrijednost modela. Zbog toga se rezultat kroz više pokretanja razlikovao.
+Za `openai` profil nije bilo moguće forsirati `temperature=0`, pa je korištena podrazumijevana vrijednost modela. U finalnoj verziji prompta oba profila su ipak kroz pet pokretanja davala isti rezultat.
 
-| slučaj | neuspješna pokretanja | priroda |
-| --- | --- | --- |
-| `valid_approaching_fast` | 5/5 | dvosmislen prompt |
-| `reject_icy_road` | 2/5 | varijansa temperature |
+### Dorada prompta i granica evaluacionog skupa
 
-`valid_approaching_fast` je pokazao da je korišćeni prompt bio dvosmislen za izjave koje istovremeno opisuju stanje na putu i postavljaju pitanje. Naknadno je prompt dodatno preciziran.
+Nakon prelaska na kompaktni format prompt je dodatno dorađivan prema slučajevima koji su padali na stress skupu.
 
-`reject_icy_road` je izjava van domena jer led nije dio baze znanja. U dva od pet pokretanja model ju je pogrešno povezao sa `losi_uslovi` i prihvatio nepodržan upit.
+| izmjena prompta | posljedica |
+| --- | --- |
+| prelazak na jednu liniju | `openai` počinje da pada na `valid_approaching_fast` |
+| preformulisano pravilo o opisu vozačeve situacije | popravlja `valid_approaching_fast`, kvari `reject_icy_road` |
+| dodato **"These are exact concepts, not loose synonyms"** | popravlja `reject_icy_road` kod `openai`, ne i kod `local` |
+
+Rezultat kroz pet pokretanja stress skupa, prije i poslije dorade:
+
+| | validni | odbijeni | padovi |
+| --- | --- | --- | --- |
+| `local`, prije | 45/45 (100%) | 55/55 (100%) | nema |
+| `openai`, prije | 40/45 (88.9%) | 53/55 (96.4%) | `valid_approaching_fast` 5/5, `reject_icy_road` 2/5 |
+| `local`, poslije | 45/45 (100%) | 50/55 (90.9%) | `reject_icy_road` 5/5 |
+| `openai`, poslije | 45/45 (100%) | 55/55 (100%) | nema |
+
+Ukupan broj grešaka se smanjio sa 7 na 5, ali se greška promijenila između profila: izmjena koja je pomogla `openai` profilu pogoršala je rezultat kod `local` profila. To pokazuje da prompt nije neutralna komponenta sistema, nego dio koji može različito djelovati na različite modele.
+
+Treba imati u vidu da su ove izmjene rađene prema istom stress skupu na kojem se rezultat mjeri. Zato finalni brojevi mogu biti optimistični: skup je djelimično postao skup za podešavanje prompta, a ne potpuno nezavisna provjera. Dalje dotjerivanje prompta je zato zaustavljeno, jer bi dodatne izmjene mogle samo bolje uklopiti instrukcije u postojećih 20 slučajeva, bez dokaza da pomažu na novim izjavama.
+
+### Preostali slučaj: `reject_icy_road`
+
+`reject_icy_road` (**"Je li zaleđen put?"**) je izjava van domena, jer led nije dio baze znanja. `local` ju je u svih pet pokretanja povezao sa `losi_uslovi` i prihvatio nepodržan upit, dok ju je `openai` svih pet puta odbio.
+
+Slučaj je zadržan jer pokazuje ograničenje LLM prevoda: model može pogrešno povezati korisnički izraz sa postojećim ciljem iz zatvorenog rječnika. To ne znači da može izmisliti novu činjenicu ili promijeniti logička pravila, ali može dovesti do odgovora na pogrešno mapiran upit. U ovom slučaju prihvatanje nepodržanog pitanja je nepovoljnije od odbijanja podržanog, jer sistem odgovara na nešto što ne modeluje pouzdano.
 
 ## Zaključak i ograničenja
 
 Iz rezultata se može zaključiti da trenutna implementacija ispravno radi na pokrivenim evaluacionim slučajevima. Logički sloj je deterministički, a razlike između LLM konfiguracija najviše se vide u latenciji, potrošnji tokena i stabilnosti prevoda.
 
-Treba imati u vidu da su skupovi mali i ručno pisani, pa visoka tačnost ne znači opštu pouzdanost sistema, nego samo da u pokrivenim slučajevima nisu uočene očigledne greške.
-
-
+Treba imati u vidu dva ograničenja. Skupovi su mali i ručno pisani, pa visoka tačnost ne znači opštu pouzdanost sistema, nego samo da u pokrivenim slučajevima nisu uočene očigledne greške. Uz to je prompt za prevod doteran prema padovima na tom istom stress skupu, pa prijavljena tačnost prevoda mjeri uklapanje u poznate slučajeve prije nego generalizaciju. Nezavisna procjena tražila bi skup izjava koji nije korišten tokom dorade prompta.
 
 ## Fajlovi sa rezultatima
 
@@ -154,5 +173,6 @@ Treba imati u vidu da su skupovi mali i ručno pisani, pa visoka tačnost ne zna
 | iteracija 1, prevod, glavni | `translation_20260912_080317.csv` |
 | iteracija 1, prevod, stress | `translation_stress_20260911_180440.csv`, `…180655.csv`, `…184823.csv` |
 | iteracija 1, `unsupported` mod | `translation_stress_20260911_152445.csv` (prije), `…180440.csv`, `…184823.csv` (poslije) |
-| iteracija 2, prevod, glavni | `translation_20260912_140539.csv` |
-| iteracija 2, prevod, stress ×5 | `translation_stress_20260912_134020.csv`, `…134120.csv`, `…135240.csv`, `…135309.csv`, `…135344.csv` |
+| iteracija 2, prevod, glavni | `translation_20260912_153316.csv` |
+| iteracija 2, prevod, stress ×5, prije dorade prompta | `translation_stress_20260912_134020.csv`, `…134120.csv`, `…135240.csv`, `…135309.csv`, `…135344.csv` |
+| iteracija 2, prevod, stress ×5, poslije dorade prompta | `translation_stress_20260912_152422.csv`, `…152542.csv`, `…152611.csv`, `…152637.csv`, `…152706.csv` |

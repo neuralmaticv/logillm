@@ -1,0 +1,31 @@
+﻿config,provider,model,case_id,utterance,expected_mode,expected_target,expected_speed_kmh,predicted_mode,predicted_target,predicted_speed_kmh,exact_match,errors,attempts,prompt_tokens,completion_tokens,cached_tokens,latency_s,reply
+local,local,Qwen/Qwen3.5-9B,collision_risk_close_fast,Postoji li rizik sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,545,6,0,0.29,claim rizik_sudara
+local,local,Qwen/Qwen3.5-9B,collision_risk_safe_distance,Ima li opasnosti od sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,547,6,0,0.28,claim rizik_sudara
+local,local,Qwen/Qwen3.5-9B,slow_down_low_visibility,Da li treba da usporim?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,545,8,0,0.401,claim usporavanje_potrebno
+local,local,Qwen/Qwen3.5-9B,slow_down_clear_road,Moram li smanjiti brzinu?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,547,8,0,0.312,claim usporavanje_potrebno
+local,local,Qwen/Qwen3.5-9B,brake_collision_risk,Trebam li kočiti?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,544,8,0,0.421,claim usporavanje_potrebno
+local,local,Qwen/Qwen3.5-9B,emergency_braking_very_close,Trebam li naglo zakočiti?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,546,7,0,0.308,claim hitno_kocenje
+local,local,Qwen/Qwen3.5-9B,emergency_braking_not_critical,Da li je potrebno hitno kočenje?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,546,7,0,0.292,claim hitno_kocenje
+local,local,Qwen/Qwen3.5-9B,critical_risk_low_visibility,Da li je situacija kritična?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,546,7,0,0.281,claim nivo_kritican
+local,local,Qwen/Qwen3.5-9B,critical_risk_good_visibility,Je li nivo opasnosti kritičan?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,548,7,0,0.297,claim nivo_kritican
+local,local,Qwen/Qwen3.5-9B,cruise_on_clear_road,Uključi tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,544,8,0,0.335,request tempomat_dozvoljen
+local,local,Qwen/Qwen3.5-9B,cruise_low_visibility,Aktiviraj tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,544,8,0,0.347,request tempomat_dozvoljen
+local,local,Qwen/Qwen3.5-9B,cruise_permission_question,Da li smijem uključiti tempomat?,claim,tempomat_dozvoljen,,claim,tempomat_dozvoljen,,True,,1,547,8,0,0.408,claim tempomat_dozvoljen
+local,local,Qwen/Qwen3.5-9B,cruise_speed_under_limit,Postavi brzinu na 100 km/h.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,550,12,0,0.51,request tempomat_dozvoljen 100
+local,local,Qwen/Qwen3.5-9B,cruise_speed_collision_risk,Namjesti tempomat na 100.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,548,12,0,0.427,request tempomat_dozvoljen 100
+local,local,Qwen/Qwen3.5-9B,cruise_speed_over_limit,Postavi tempomat na 140 km/h.,request,tempomat_dozvoljen,140,request,tempomat_dozvoljen,140.0,True,,1,549,12,0,0.43,request tempomat_dozvoljen 140
+openai,openai,gpt-5.6-luna,collision_risk_close_fast,Postoji li rizik sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,518,9,0,0.915,claim rizik_sudara
+openai,openai,gpt-5.6-luna,collision_risk_safe_distance,Ima li opasnosti od sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,520,9,0,1.216,claim rizik_sudara
+openai,openai,gpt-5.6-luna,slow_down_low_visibility,Da li treba da usporim?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,518,11,0,0.953,claim usporavanje_potrebno
+openai,openai,gpt-5.6-luna,slow_down_clear_road,Moram li smanjiti brzinu?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,519,11,0,0.969,claim usporavanje_potrebno
+openai,openai,gpt-5.6-luna,brake_collision_risk,Trebam li kočiti?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,517,63,0,1.336,claim usporavanje_potrebno
+openai,openai,gpt-5.6-luna,emergency_braking_very_close,Trebam li naglo zakočiti?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,519,9,0,0.622,claim hitno_kocenje
+openai,openai,gpt-5.6-luna,emergency_braking_not_critical,Da li je potrebno hitno kočenje?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,519,9,0,0.672,claim hitno_kocenje
+openai,openai,gpt-5.6-luna,critical_risk_low_visibility,Da li je situacija kritična?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,519,8,0,0.663,claim nivo_kritican
+openai,openai,gpt-5.6-luna,critical_risk_good_visibility,Je li nivo opasnosti kritičan?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,520,8,0,1.208,claim nivo_kritican
+openai,openai,gpt-5.6-luna,cruise_on_clear_road,Uključi tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,516,10,0,1.049,request tempomat_dozvoljen
+openai,openai,gpt-5.6-luna,cruise_low_visibility,Aktiviraj tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,516,10,0,0.648,request tempomat_dozvoljen
+openai,openai,gpt-5.6-luna,cruise_permission_question,Da li smijem uključiti tempomat?,claim,tempomat_dozvoljen,,claim,tempomat_dozvoljen,,True,,1,520,10,0,0.728,claim tempomat_dozvoljen
+openai,openai,gpt-5.6-luna,cruise_speed_under_limit,Postavi brzinu na 100 km/h.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,520,12,0,0.75,request tempomat_dozvoljen 100
+openai,openai,gpt-5.6-luna,cruise_speed_collision_risk,Namjesti tempomat na 100.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,519,12,0,0.714,request tempomat_dozvoljen 100
+openai,openai,gpt-5.6-luna,cruise_speed_over_limit,Postavi tempomat na 140 km/h.,request,tempomat_dozvoljen,140,request,tempomat_dozvoljen,140.0,True,,1,520,12,0,0.819,request tempomat_dozvoljen 140
