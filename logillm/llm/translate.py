@@ -60,6 +60,8 @@ MODE follows the form of the utterance, not its topic:
            TARGET must be one of: {requestable}
 
 TARGET: {targets}
+These are exact concepts, not loose synonyms: pick one only when the driver asks
+about that concept itself.
 
 SPEED: optional, only with {speed_targets}; a bare number in km/h, no unit.
 
