@@ -1,5 +1,5 @@
 from logillm.config import LLMConfig
-from logillm.llm.client import ask
+from logillm.llm.client import Reply, ask
 
 SYSTEM = """Explain the system's decision to the driver in Serbo-Croatian (ijekavian),
 in at most two sentences, like a short in-car assistance message.
@@ -19,7 +19,7 @@ def explain(
     verdict: str,
     evidence: list[str],
     config: LLMConfig | None = None,
-) -> str:
+) -> Reply:
     """Turn a verdict and its supporting evidence into a sentence for the driver."""
     lines = "\n".join(f"- {item}" for item in evidence) or "- (nema dodatnih podataka)"
     user = f"Korisnik je rekao: {utterance}\nOdluka sistema: {verdict}\nNa čemu se odluka zasniva:\n{lines}"

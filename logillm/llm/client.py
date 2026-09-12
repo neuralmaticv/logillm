@@ -1,6 +1,7 @@
 import json
 import urllib.error
 import urllib.request
+from dataclasses import dataclass
 
 from logillm.config import LLMConfig, llm_config
 
@@ -9,12 +10,60 @@ Message = dict[str, str]
 TIMEOUT_S = 120
 
 
+@dataclass(frozen=True)
+class Usage:
+    """Token counts the server reported for one request."""
+
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cached_tokens: int = 0
+
+    @property
+    def total_tokens(self) -> int:
+        return self.prompt_tokens + self.completion_tokens
+
+    @property
+    def billed_prompt_tokens(self) -> int:
+        """Prompt tokens the server had to process, i.e. those not served from cache."""
+        return self.prompt_tokens - self.cached_tokens
+
+    def __add__(self, other: Usage) -> Usage:
+        return Usage(
+            self.prompt_tokens + other.prompt_tokens,
+            self.completion_tokens + other.completion_tokens,
+            self.cached_tokens + other.cached_tokens,
+        )
+
+
+@dataclass(frozen=True)
+class Reply:
+    """One assistant reply and the tokens it cost."""
+
+    text: str
+    usage: Usage
+
+
+def _usage(body: dict) -> Usage:
+    """Read token counts from a response, tolerating servers that omit them."""
+    raw = body.get("usage")
+    if not isinstance(raw, dict):
+        return Usage()
+
+    details = raw.get("prompt_tokens_details")
+    cached = details.get("cached_tokens", 0) if isinstance(details, dict) else 0
+    return Usage(
+        prompt_tokens=int(raw.get("prompt_tokens", 0)),
+        completion_tokens=int(raw.get("completion_tokens", 0)),
+        cached_tokens=int(cached or 0),
+    )
+
+
 def chat(
     messages: list[Message],
     config: LLMConfig | None = None,
     temperature: float = 0.0,
-) -> str:
-    """Send a conversation and return the assistant's next reply.
+) -> Reply:
+    """Send a conversation and return the assistant's next reply with its token usage.
 
     Works with any OpenAI-compatible endpoint.
     Pass config explicitly to run the same prompt against different models.
@@ -55,7 +104,7 @@ def chat(
         raise RuntimeError(f"[{config.provider}] LLM response has an unexpected structure.") from error
     if not isinstance(content, str):
         raise TypeError(f"[{config.provider}] LLM response content is not text.")
-    return content
+    return Reply(content, _usage(body))
 
 
 def ask(
@@ -63,7 +112,7 @@ def ask(
     user: str,
     config: LLMConfig | None = None,
     temperature: float = 0.0,
-) -> str:
+) -> Reply:
     """Send a system and a user message and return the assistant's reply."""
     messages: list[Message] = [
         {"role": "system", "content": system},

@@ -141,6 +141,9 @@ def _row(
         "exact_match": query == expected,
         "errors": ";".join(errors),
         "attempts": len(translation.rejections) + 1 if translation else None,
+        "prompt_tokens": translation.usage.prompt_tokens if translation else None,
+        "completion_tokens": translation.usage.completion_tokens if translation else None,
+        "cached_tokens": translation.usage.cached_tokens if translation else None,
         "latency_s": round(latency, 3),
         "reply": translation.reply.strip() if translation else None,
     }
@@ -233,6 +236,9 @@ def _stress_row(
         "error": error,
         "invalid_target_seen": invalid_target,
         "attempts": len(translation.rejections) + 1 if translation else None,
+        "prompt_tokens": translation.usage.prompt_tokens if translation else None,
+        "completion_tokens": translation.usage.completion_tokens if translation else None,
+        "cached_tokens": translation.usage.cached_tokens if translation else None,
         "latency_s": round(latency, 3),
         "reply": translation.reply.strip() if translation else None,
     }

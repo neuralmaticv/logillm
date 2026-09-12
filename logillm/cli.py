@@ -120,6 +120,15 @@ def _print_result(result: PipelineResult) -> None:
         if result.explanation_error:
             print(f"  Razlog: {result.explanation_error}")
 
+    usage = result.usage
+    if usage.total_tokens:
+        print("\nPotrošnja tokena")
+        print(f"  prevod:      {result.translation_usage.total_tokens}")
+        print(f"  objašnjenje: {result.explanation_usage.total_tokens}")
+        print(f"  ukupno:      {usage.total_tokens}")
+        if usage.cached_tokens:
+            print(f"  iz keša:     {usage.cached_tokens} (stvarno obrađeno: {usage.billed_prompt_tokens})")
+
 
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_utf8_output()

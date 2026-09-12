@@ -10,6 +10,7 @@ from logillm.adas.knowledge_base import (
 )
 from logillm.config import LLMConfig
 from logillm.grounding import SensorReadings, ground
+from logillm.llm.client import Usage
 from logillm.llm.explain import explain
 from logillm.llm.translate import Rejection, translate
 from logillm.llm.validate import Query
@@ -32,6 +33,13 @@ class PipelineResult:
     explanation: str | None
     explanation_error: str | None = None
     rejections: tuple[Rejection, ...] = ()
+    translation_usage: Usage = Usage()
+    explanation_usage: Usage = Usage()
+
+    @property
+    def usage(self) -> Usage:
+        """Tokens spent on the whole run, translation and explanation together."""
+        return self.translation_usage + self.explanation_usage
 
 
 def _names(items) -> str:
@@ -155,12 +163,23 @@ def run_pipeline(utterance: str, readings: SensorReadings, config: LLMConfig) ->
     decision = decide(query, readings)
 
     try:
-        explanation = explain(
-            utterance,
-            decision.verdict,
-            list(decision.evidence),
-            config=config,
-        ).strip()
+        answer = explain(utterance, decision.verdict, list(decision.evidence), config=config)
     except (RuntimeError, TypeError) as error:
-        return PipelineResult(translation.reply, query, decision, None, str(error), translation.rejections)
-    return PipelineResult(translation.reply, query, decision, explanation, rejections=translation.rejections)
+        return PipelineResult(
+            translation.reply,
+            query,
+            decision,
+            None,
+            str(error),
+            translation.rejections,
+            translation.usage,
+        )
+    return PipelineResult(
+        translation.reply,
+        query,
+        decision,
+        answer.text.strip(),
+        rejections=translation.rejections,
+        translation_usage=translation.usage,
+        explanation_usage=answer.usage,
+    )

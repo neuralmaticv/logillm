@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from logillm.adas.knowledge_base import QUERY_TARGETS, REQUESTABLE_VARS, SPEED_TARGETS
 from logillm.config import LLMConfig
-from logillm.llm.client import Message, chat
+from logillm.llm.client import Message, Usage, chat
 from logillm.llm.validate import Query, UnsupportedQueryError, ValidationError, validate
 
 MAX_ATTEMPTS = 3
@@ -39,6 +39,7 @@ class Translation:
     reply: str
     query: Query
     rejections: tuple[Rejection, ...]
+    usage: Usage
 
 
 def build_system_prompt() -> str:
@@ -90,9 +91,11 @@ def translate(text: str, config: LLMConfig | None = None, max_attempts: int = MA
         {"role": "user", "content": text},
     ]
     rejections: list[Rejection] = []
+    usage = Usage()
 
     for _ in range(max_attempts):
-        reply = chat(messages, config=config, temperature=0.0)
+        answer = chat(messages, config=config, temperature=0.0)
+        reply, usage = answer.text, usage + answer.usage
         try:
             query = validate(reply)
         except UnsupportedQueryError:
@@ -104,6 +107,6 @@ def translate(text: str, config: LLMConfig | None = None, max_attempts: int = MA
                 {"role": "user", "content": FEEDBACK.format(error=error)},
             ]
         else:
-            return Translation(reply, query, tuple(rejections))
+            return Translation(reply, query, tuple(rejections), usage)
 
     raise ValidationError(f"No valid reply after {max_attempts} attempts. Last error: {rejections[-1].error}")
