@@ -28,11 +28,11 @@ CONFIGS: dict[str, tuple[str, bool | None]] = {
     "openai": ("openai", None),
 }
 
-# prefix of the message validate() raises when a reply cannot be parsed as JSON
-JSON_ERROR_PREFIX = "Reply is not valid JSON"
+# prefixes of the messages validate() raises when a reply does not have the expected shape
+FORMAT_ERROR_PREFIXES = ("Reply is empty", "Reply must be a single line", "Reply must be 'MODE TARGET")
 ERROR_TYPES = (
     "request_error",
-    "invalid_json",
+    "invalid_format",
     "invalid_schema",
     "unsupported",
     "wrong_mode",
@@ -48,7 +48,7 @@ class Result:
     name: str
     config: LLMConfig
     cases: int = 0
-    valid_json: int = 0
+    valid_format: int = 0
     schema_valid: int = 0
     mode_correct: int = 0
     target_correct: int = 0
@@ -69,7 +69,7 @@ def _translate(utterance: str, config: LLMConfig) -> tuple[Translation | None, s
         return None, "unsupported", str(error)
     except ValidationError as error:
         last_error = str(error).split("Last error: ", 1)[-1]
-        kind = "invalid_json" if last_error.startswith(JSON_ERROR_PREFIX) else "invalid_schema"
+        kind = "invalid_format" if last_error.startswith(FORMAT_ERROR_PREFIXES) else "invalid_schema"
         return None, kind, last_error
     except (RuntimeError, TypeError) as error:
         return None, "request_error", str(error)
@@ -99,8 +99,8 @@ def evaluate(name: str, config: LLMConfig, cases: list[dict]) -> Result:
         result.cases += 1
         result.latencies.append(latency)
         result.errors.update(errors)
-        # an "unsupported" reply is valid JSON that follows the schema, but wrong for a supported case
-        result.valid_json += query is not None or error in ("invalid_schema", "unsupported")
+        # an "unsupported" reply has a valid format and follows the schema, but wrong for a supported case
+        result.valid_format += query is not None or error in ("invalid_schema", "unsupported")
         result.schema_valid += query is not None or error == "unsupported"
         result.speed_cases += expected.speed_kmh is not None
         if query is not None:
@@ -188,7 +188,7 @@ def evaluate_stress(name: str, config: LLMConfig, cases: list[dict]) -> StressRe
         if case.get("should_reject"):
             # rejected means the model marked it unsupported or translate() gave up after its retries
             expected = "rejection"
-            passed = error in ("unsupported", "invalid_json", "invalid_schema")
+            passed = error in ("unsupported", "invalid_format", "invalid_schema")
             result.reject_cases += 1
             result.reject_passed += passed
             result.marked_unsupported += error == "unsupported"
@@ -246,7 +246,7 @@ def print_table(results: list[Result]) -> None:
     rows: list[tuple[str, list[str]]] = [
         ("model", [r.config.model for r in results]),
         ("cases", [str(r.cases) for r in results]),
-        ("valid JSON", [_percent(r.valid_json, r.cases) for r in results]),
+        ("valid format", [_percent(r.valid_format, r.cases) for r in results]),
         ("schema valid", [_percent(r.schema_valid, r.cases) for r in results]),
         ("mode accuracy", [_percent(r.mode_correct, r.cases) for r in results]),
         ("target accuracy", [_percent(r.target_correct, r.cases) for r in results]),

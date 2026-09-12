@@ -1,0 +1,16 @@
+﻿config,provider,model,case_id,utterance,expected_mode,expected_target,expected_speed_kmh,predicted_mode,predicted_target,predicted_speed_kmh,exact_match,errors,attempts,latency_s,reply
+local,local,Qwen/Qwen3.5-9B,collision_risk_close_fast,Postoji li rizik sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,0.286,claim rizik_sudara
+local,local,Qwen/Qwen3.5-9B,collision_risk_safe_distance,Ima li opasnosti od sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,0.27,claim rizik_sudara
+local,local,Qwen/Qwen3.5-9B,slow_down_low_visibility,Da li treba da usporim?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.317,claim usporavanje_potrebno
+local,local,Qwen/Qwen3.5-9B,slow_down_clear_road,Moram li smanjiti brzinu?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.324,claim usporavanje_potrebno
+local,local,Qwen/Qwen3.5-9B,brake_collision_risk,Trebam li kočiti?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.321,claim usporavanje_potrebno
+local,local,Qwen/Qwen3.5-9B,emergency_braking_very_close,Trebam li naglo zakočiti?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,0.302,claim hitno_kocenje
+local,local,Qwen/Qwen3.5-9B,emergency_braking_not_critical,Da li je potrebno hitno kočenje?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,0.299,claim hitno_kocenje
+local,local,Qwen/Qwen3.5-9B,critical_risk_low_visibility,Da li je situacija kritična?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,0.364,claim nivo_kritican
+local,local,Qwen/Qwen3.5-9B,critical_risk_good_visibility,Je li nivo opasnosti kritičan?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,0.309,claim nivo_kritican
+local,local,Qwen/Qwen3.5-9B,cruise_on_clear_road,Uključi tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,0.319,request tempomat_dozvoljen
+local,local,Qwen/Qwen3.5-9B,cruise_low_visibility,Aktiviraj tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,0.3,request tempomat_dozvoljen
+local,local,Qwen/Qwen3.5-9B,cruise_permission_question,Da li smijem uključiti tempomat?,claim,tempomat_dozvoljen,,claim,tempomat_dozvoljen,,True,,1,0.313,claim tempomat_dozvoljen
+local,local,Qwen/Qwen3.5-9B,cruise_speed_under_limit,Postavi brzinu na 100 km/h.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,0.411,request tempomat_dozvoljen 100
+local,local,Qwen/Qwen3.5-9B,cruise_speed_collision_risk,Namjesti tempomat na 100.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,0.393,request tempomat_dozvoljen 100
+local,local,Qwen/Qwen3.5-9B,cruise_speed_over_limit,Postavi tempomat na 140 km/h.,request,tempomat_dozvoljen,140,request,tempomat_dozvoljen,140.0,True,,1,0.419,request tempomat_dozvoljen 140

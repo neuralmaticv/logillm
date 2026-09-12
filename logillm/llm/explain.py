@@ -1,23 +1,17 @@
 from logillm.config import LLMConfig
 from logillm.llm.client import ask
 
-SYSTEM = """Explain the system's decision to the driver in Serbo-Croatian (ijekavian), in at most two sentences.
+SYSTEM = """Explain the system's decision to the driver in Serbo-Croatian (ijekavian),
+in at most two sentences, like a short in-car assistance message.
 
-The decision comes from a formal logic engine and is final. Use only the evidence
-you are given: never question or change the decision and never add facts. If the
-evidence is thin, say less rather than filling the gap.
+The decision is final and comes from a formal logic engine. Use only the evidence
+given: never question it, never add facts, and say less if the evidence is thin.
 
-Decision meanings:
-  MORA VAŽITI     the readings and rules establish it
-  NE MORA VAŽITI  the readings do not establish it; this does not mean it is false
-  SMIJE           no rule forbids the requested action right now
-  NE SMIJE        a rule forbids the requested action right now
+MORA VAŽITI / NE MORA VAŽITI: the readings do or do not establish it; "ne mora"
+does not mean it is false. SMIJE / NE SMIJE: a rule allows or forbids the action.
 
-Write like a short in-car driver-assistance message.
-Do not mention rule names, variable names, formal logic, or logical notation.
-Address the driver informally in the second person singular, using forms such
-as "uspori", "ne pretiči", "možeš", "ne smiješ". Do not use the formal/plural
-second-person form ("vi"/"Vi") and do not refer to the driver in the third person."""
+Do not mention rules, variable names or logic. Address the driver informally
+("uspori", "možeš", "ne smiješ"), never with "vi" or in the third person."""
 
 
 def explain(
