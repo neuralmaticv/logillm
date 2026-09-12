@@ -220,10 +220,3 @@ __marimo__/
 docs/*
 !docs/diagrams/
 !docs/evaluation.md
-experiments/results/*
-!experiments/results/logic_20260911_182804.csv
-!experiments/results/translation_20260912_080317.csv
-!experiments/results/translation_stress_20260911_152445.csv
-!experiments/results/translation_stress_20260911_180440.csv
-!experiments/results/translation_stress_20260911_180655.csv
-!experiments/results/translation_stress_20260911_184823.csv
