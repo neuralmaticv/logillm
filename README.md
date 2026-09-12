@@ -184,6 +184,14 @@ docker run -d --rm --name vllm-test --gpus all --ipc host --network host \
 | `--gpu-memory-utilization 0.50` | zauzima 50% ukupne GPU memorije |
 | `--max-model-len 16384` | najveća dužina konteksta; po potrebi smanjiti |
 
+## Mogući pravci za dalje istraživanje
+
+- **Encoder-only prevod upita** - zamijeniti generativni LLM manjim klasifikacionim modelom za `mode` i `target`.
+- **Efikasniji logički sloj** - dodati SAT/Z3 backend i uporediti ga sa trenutnom provjerom svih valuacija.
+- **Proširenje ADAS modela** - dodati više senzorskih stanja, pravila i scenarija.
+- **Naprednije logičko modelovanje** - razmotriti fazi logiku za stepen rizika i predikatsku logiku za više objekata i relacija.
+- **Veći evaluacioni skup** - dodati više parafraza, nepodržanih upita i graničnih senzorskih vrijednosti.
+
 ## Reference
 
 - Pan, Albalak, Wang i Wang. **Logic-LM: Empowering Large Language Models with Symbolic Solvers for Faithful Logical Reasoning**. [arXiv:2305.12295](https://arxiv.org/abs/2305.12295), 2023.
