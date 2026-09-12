@@ -148,6 +148,16 @@ uv run ruff check .
 uv run ruff format .
 ```
 
+## Evaluacija
+
+```bash
+uv run scripts/evaluate_logic.py
+uv run scripts/evaluate_translation.py --config local --config local-thinking --config openai
+uv run scripts/evaluate_translation.py --stress --config local --config local-thinking --config openai
+```
+
+Rezultati po slučaju upisuju se u `experiments/results/`, a analiza je dostupna u [docs/evaluation.md](docs/evaluation.md).
+
 ## LLM server
 
 U ovoj fazi koristi se lokalni LLM model `Qwen/Qwen3.5-9B` ([HF repo](https://huggingface.co/Qwen/Qwen3.5-9B)), serviran preko `vLLM` instance sa OpenAI-kompatibilnim endpointom. Izbor konkretnog modela nije presudan, jer LLM ne donosi formalnu odluku, već prevodi ulaz i objašnjava rezultat logičkog modula.

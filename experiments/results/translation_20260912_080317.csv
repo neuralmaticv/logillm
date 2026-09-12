@@ -1,0 +1,733 @@
+﻿config,provider,model,case_id,utterance,expected_mode,expected_target,expected_speed_kmh,predicted_mode,predicted_target,predicted_speed_kmh,exact_match,errors,attempts,latency_s,reply
+local,local,Qwen/Qwen3.5-9B,collision_risk_close_fast,Postoji li rizik sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,0.696,"{""mode"": ""claim"", ""target"": ""rizik_sudara""}"
+local,local,Qwen/Qwen3.5-9B,collision_risk_safe_distance,Ima li opasnosti od sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,0.537,"{""mode"": ""claim"", ""target"": ""rizik_sudara""}"
+local,local,Qwen/Qwen3.5-9B,slow_down_low_visibility,Da li treba da usporim?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.566,"{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}"
+local,local,Qwen/Qwen3.5-9B,slow_down_clear_road,Moram li smanjiti brzinu?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.567,"{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}"
+local,local,Qwen/Qwen3.5-9B,brake_collision_risk,Trebam li kočiti?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.582,"{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}"
+local,local,Qwen/Qwen3.5-9B,emergency_braking_very_close,Trebam li naglo zakočiti?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,0.549,"{""mode"": ""claim"", ""target"": ""hitno_kocenje""}"
+local,local,Qwen/Qwen3.5-9B,emergency_braking_not_critical,Da li je potrebno hitno kočenje?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,0.62,"{""mode"": ""claim"", ""target"": ""hitno_kocenje""}"
+local,local,Qwen/Qwen3.5-9B,critical_risk_low_visibility,Da li je situacija kritična?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,0.582,"{""mode"": ""claim"", ""target"": ""nivo_kritican""}"
+local,local,Qwen/Qwen3.5-9B,critical_risk_good_visibility,Je li nivo opasnosti kritičan?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,0.551,"{""mode"": ""claim"", ""target"": ""nivo_kritican""}"
+local,local,Qwen/Qwen3.5-9B,cruise_on_clear_road,Uključi tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,0.577,"{""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}"
+local,local,Qwen/Qwen3.5-9B,cruise_low_visibility,Aktiviraj tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,0.589,"{""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}"
+local,local,Qwen/Qwen3.5-9B,cruise_permission_question,Da li smijem uključiti tempomat?,claim,tempomat_dozvoljen,,claim,tempomat_dozvoljen,,True,,1,0.559,"{""mode"": ""claim"", ""target"": ""tempomat_dozvoljen""}"
+local,local,Qwen/Qwen3.5-9B,cruise_speed_under_limit,Postavi brzinu na 100 km/h.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,0.803,"{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}"
+local,local,Qwen/Qwen3.5-9B,cruise_speed_collision_risk,Namjesti tempomat na 100.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,0.787,"{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}"
+local,local,Qwen/Qwen3.5-9B,cruise_speed_over_limit,Postavi tempomat na 140 km/h.,request,tempomat_dozvoljen,140,request,tempomat_dozvoljen,140.0,True,,1,0.813,"{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 140}"
+local-thinking,local,Qwen/Qwen3.5-9B,collision_risk_close_fast,Postoji li rizik sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,15.682,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian (""Postoji li rizik sudara?"").
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields: ""mode"", ""target"", ""speed_kmh"" (optional).
+    *   Logic for ""mode"":
+        *   ""request"": Driver tells system to do something.
+        *   ""claim"": Driver asks a question (including safety/allowance).
+        *   ""unsupported"": Does not clearly ask about specific targets, explanations, commands, vague, etc.
+    *   Logic for ""target"": Must be one of the specific list values.
+    *   Input Utterance: ""Postoji li rizik sudara?"" (Is there a risk of collision?)
+
+2.  **Determine ""mode"":**
+    *   The utterance is a question (""Postoji li..."" = ""Is there..."").
+    *   It is asking about a condition (risk of collision).
+    *   According to the instructions: ""Use 'claim' when the driver asks a question, including whether an action is safe or allowed"".
+    *   So, ""mode"" = ""claim"".
+
+3.  **Determine ""target"":**
+    *   The question is about ""rizik sudara"" (risk of collision).
+    *   Looking at the allowed target list: `blizu, brzo_priblizavanje, hitno_kocenje, losi_uslovi, nivo_kritican, nivo_visok, rizik_sudara, smanjena_vidljivost, tempomat_dozvoljen, ubrzavanje_dozvoljeno, usporavanje_potrebno, veoma_blizu`.
+    *   ""rizik_sudara"" matches exactly.
+    *   So, ""target"" = ""rizik_sudara"".
+
+4.  **Determine ""speed_kmh"":**
+    *   The utterance does not mention a specific speed.
+    *   So, omit this field.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""rizik_sudara""}`
+
+6.  **Final Review:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   No extra text? Yes.
+    *   Matches the example style (e.g., Input: Postoji li opasnost od sudara? -> Output: {""mode"": ""claim"", ""target"": ""rizik_sudara""}). Note: The example in the prompt is ""Postoji li opasnost od sudara?"" which maps to ""rizik_sudara"". The current input is ""Postoji li rizik sudara?"", which is semantically identical.
+
+7.  **Output Generation:**
+    *   `{""mode"": ""claim"", ""target"": ""rizik_sudara""}`
+</think>
+
+{""mode"": ""claim"", ""target"": ""rizik_sudara""}"
+local-thinking,local,Qwen/Qwen3.5-9B,collision_risk_safe_distance,Ima li opasnosti od sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,15.156,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian (""Ima li opasnosti od sudara?"").
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields: ""mode"", ""target"", ""speed_kmh"" (optional).
+    *   Logic for ""mode"":
+        *   ""request"": Driver tells system to do something.
+        *   ""claim"": Driver asks a question (including safety/allowance).
+        *   ""unsupported"": Does not clearly ask about specific targets, explanations, commands, vague, etc.
+    *   Logic for ""target"": Must be one of the specific list provided.
+    *   Input Utterance: ""Ima li opasnosti od sudara?"" (Is there a danger of collision?)
+
+2.  **Determine ""mode"":**
+    *   The utterance is a question (""Ima li..."" = ""Is there..."").
+    *   It asks about the state of the road/traffic regarding collision risk.
+    *   Therefore, ""mode"" should be ""claim"".
+
+3.  **Determine ""target"":**
+    *   The question is about ""opasnosti od sudara"" (danger of collision).
+    *   Looking at the allowed target list: `blizu, brzo_priblizavanje, hitno_kocenje, losi_uslovi, nivo_kritican, nivo_visok, rizik_sudara, smanjena_vidljivost, tempomat_dozvoljen, ubrzavanje_dozvoljeno, usporavanje_potrebno, veoma_blizu`.
+    *   ""rizik_sudara"" matches ""danger of collision"" / ""risk of collision"".
+    *   Therefore, ""target"" should be ""rizik_sudara"".
+
+4.  **Determine ""speed_kmh"":**
+    *   The utterance does not mention a specific speed.
+    *   Therefore, this field should be omitted.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""rizik_sudara""}`
+
+6.  **Final Review:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   Correct fields? Yes.
+    *   Correct values based on examples? Yes (Input: ""Postoji li opasnost od sudara?"" -> Output: {""mode"": ""claim"", ""target"": ""rizik_sudara""}). The current input ""Ima li opasnosti od sudara?"" is semantically identical to the example ""Postoji li opasnost od sudara?"".
+
+7.  **Output Generation:**
+    *   `{""mode"": ""claim"", ""target"": ""rizik_sudara""}`
+</think>
+
+{""mode"": ""claim"", ""target"": ""rizik_sudara""}"
+local-thinking,local,Qwen/Qwen3.5-9B,slow_down_low_visibility,Da li treba da usporim?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,16.853,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian (""Da li treba da usporim?"").
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields:
+        *   `mode`: ""request"", ""claim"", or ""unsupported"".
+        *   `target`: One specific value from a predefined list.
+        *   `speed_kmh`: Optional, only for specific targets.
+    *   Specific Rules for `mode`:
+        *   ""request"": Driver tells system to do something (imperative).
+        *   ""claim"": Driver asks a question (including safety/allowance).
+        *   ""unsupported"": Does not clearly ask about the specific targets, explanations, commands, vague, etc.
+    *   Specific Rules for `target`:
+        *   Must be one of: `blizu`, `brzo_priblizavanje`, `hitno_kocenje`, `losi_uslovi`, `nivo_kritican`, `nivo_visok`, `rizik_sudara`, `smanjena_vidljivost`, `tempomat_dozvoljen`, `ubrzavanje_dozvoljeno`, `usporavanje_potrebno`, `veoma_blizu`.
+        *   If `mode` is ""request"", target must be `tempomat_dozvoljen` or `ubrzavanje_dozvoljeno`.
+
+2.  **Analyze the Input Utterance:**
+    *   Utterance: ""Da li treba da usporim?""
+    *   Translation: ""Do I need to slow down?"" or ""Should I slow down?""
+    *   Intent: The driver is asking a question about whether slowing down is necessary.
+
+3.  **Determine `mode`:**
+    *   Is it a command? No, it's a question (""Da li..."").
+    *   Is it a claim/question? Yes.
+    *   So, `mode` = ""claim"".
+
+4.  **Determine `target`:**
+    *   The question is about slowing down (""usporim"").
+    *   Looking at the allowed target list: `usporavanje_potrebno` (slowing down needed).
+    *   This matches the intent perfectly.
+    *   So, `target` = ""usporavanje_potrebno"".
+
+5.  **Determine `speed_kmh`:**
+    *   The driver did not specify a speed.
+    *   So, omit this field.
+
+6.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}`
+
+7.  **Final Verification:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   Correct fields? Yes.
+    *   Matches examples? Yes (similar to ""Da li treba da smanjim brzinu?"" -> `{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}`).
+
+8.  **Output Generation:**
+    *   Produce the JSON string only.cw
+</think>
+
+{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}"
+local-thinking,local,Qwen/Qwen3.5-9B,slow_down_clear_road,Moram li smanjiti brzinu?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,17.964,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian: ""Moram li smanjiti brzinu?"" (Do I have to reduce speed?)
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields:
+        *   `mode`: ""request"", ""claim"", or ""unsupported"".
+        *   `target`: One specific value from a predefined list.
+        *   `speed_kmh`: Optional, only for specific targets.
+    *   Rules for `mode`:
+        *   ""request"": Driver tells system to do something.
+        *   ""claim"": Driver asks a question (including safety/allowance).
+        *   ""unsupported"": Does not clearly ask about exactly one of the targets, explanations, commands, vague, etc.
+    *   Rules for `target`: Must be from the list: `blizu`, `brzo_priblizavanje`, `hitno_kocenje`, `losi_uslovi`, `nivo_kritican`, `nivo_visok`, `rizik_sudara`, `smanjena_vidljivost`, `tempomat_dozvoljen`, `ubrzavanje_dozvoljeno`, `usporavanje_potrebno`, `veoma_blizu`.
+    *   Specific Example Match: The input ""Da li treba da smanjim brzinu?"" maps to `{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}` in the provided examples.
+
+2.  **Analyze the Input Utterance:**
+    *   Utterance: ""Moram li smanjiti brzinu?""
+    *   Translation: ""Do I have to reduce speed?"" or ""Should I reduce speed?""
+    *   Intent: The driver is asking about the necessity of slowing down.
+    *   Mode: This is a question (""Moram li...""), so it fits the ""claim"" category (asking about safety/requirement).
+    *   Target: The question is about reducing speed. Looking at the target list, `usporavanje_potrebno` (slowing down required) matches this intent perfectly.
+
+3.  **Construct the JSON:**
+    *   `mode`: ""claim""
+    *   `target`: ""usporavanje_potrebno""
+    *   `speed_kmh`: Not applicable (no speed mentioned).
+
+4.  **Verify Constraints:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   No extra text? Yes.
+    *   Matches example style? Yes (similar to ""Da li treba da smanjim brzinu?"").
+
+5.  **Final Output Generation:**
+    ```json
+    {""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}
+    ```
+
+6.  **Double Check:**
+    *   Input: ""Moram li smanjiti brzinu?""
+    *   Example provided: ""Da li treba da smanjim brzinu?"" -> `{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}`
+    *   My input is semantically identical to the example.
+    *   Result should be the same.
+
+7.  **Final Decision:**
+    {""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}
+</think>
+
+{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}"
+local-thinking,local,Qwen/Qwen3.5-9B,brake_collision_risk,Trebam li kočiti?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,3.15,"The user is asking ""Trebam li kočiti?"" which translates to ""Do I need to brake?"" or ""Should I brake?""
+
+This is a question about whether braking is needed, which relates to the target ""usporavanje_potrebno"" (slowing down needed).
+
+Since this is a question (not a command), the mode should be ""claim"".
+
+The target should be ""usporavanje_potrebno"" as it's asking about whether braking/slowing down is needed.
+
+Let me create the JSON output.
+</think>
+
+{""mode"": ""claim"", ""target"": ""usporavanje_potrebno""}"
+local-thinking,local,Qwen/Qwen3.5-9B,emergency_braking_very_close,Trebam li naglo zakočiti?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,24.233,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian: ""Trebam li naglo zakočiti?""
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields:
+        *   `mode`: ""request"", ""claim"", or ""unsupported"".
+        *   `target`: One specific value from a predefined list.
+        *   `speed_kmh`: Optional, only for specific targets.
+    *   Specific Rules for `mode`:
+        *   ""request"": Driver tells system to do something (""Uključi..."", ""Postavi..."", ""Ubrzaj..."").
+        *   ""claim"": Driver asks a question, including whether an action is safe or allowed (""Da li je bezbjedno..."", ""Trebam li..."").
+        *   ""unsupported"": Does not clearly ask about exactly one of the targets, explanations, commands, vague, etc.
+    *   Specific Rules for `target`:
+        *   List: `blizu`, `brzo_priblizavanje`, `hitno_kocenje`, `losi_uslovi`, `nivo_kritican`, `nivo_visok`, `rizik_sudara`, `smanjena_vidljivost`, `tempomat_dozvoljen`, `ubrzavanje_dozvoljeno`, `usporavanje_potrebno`, `veoma_blizu`.
+        *   If `mode` is ""request"", target must be `tempomat_dozvoljen` or `ubrzavanje_dozvoljeno`.
+    *   Input Utterance: ""Trebam li naglo zakočiti?"" (Do I need to brake hard/emergency brake?)
+
+2.  **Determine `mode`:**
+    *   The utterance is a question (""Trebam li..."" = ""Do I need to..."").
+    *   It asks about the necessity of an action (braking hard).
+    *   According to the rules, questions fall under ""claim"".
+    *   So, `mode` = ""claim"".
+
+3.  **Determine `target`:**
+    *   The question is about braking hard (""naglo zakočiti"").
+    *   Looking at the target list: `hitno_kocenje` (emergency braking/hard braking) seems to match ""naglo zakočiti"".
+    *   Other options: `usporavanje_potrebno` (slowing down needed) is close, but ""naglo"" implies emergency/hard braking, which maps better to `hitno_kocenje`.
+    *   Let's check the examples: ""Da li je potrebno hitno kočenje?"" -> `hitno_kocenje`. ""Trebam li naglo zakočiti?"" is semantically very similar to ""Is emergency braking needed?"".
+    *   So, `target` = ""hitno_kocenje"".
+
+4.  **Determine `speed_kmh`:**
+    *   No speed is mentioned.
+    *   So, omit this field.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""hitno_kocenje""}`
+
+6.  **Final Verification:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   Correct fields? Yes.
+    *   Correct mode? Yes (question = claim).
+    *   Correct target? Yes (naglo zakočiti = hitno_kocenje).
+
+7.  **Output Generation:**
+    *   Just the JSON string.
+
+    *Self-Correction/Refinement:*
+    Wait, let's double check the target list mapping.
+    ""naglo zakočiti"" -> ""hitno kočenje"".
+    Example provided: ""Da li je potrebno hitno kočenje?"" -> `hitno_kocenje`.
+    Input: ""Trebam li naglo zakočiti?""
+    This is a claim about whether emergency braking is needed.
+    So `{""mode"": ""claim"", ""target"": ""hitno_kocenje""}` is correct.
+
+    Is there any ambiguity with `usporavanje_potrebno`?
+    `usporavanje_potrebno` is ""slowing down needed"".
+    `hitno_kocenje` is ""emergency braking needed"".
+    ""Naglo"" means hard/sudden/emergency. So `hitno_kocenje` is the precise match.
+
+    Final check on constraints: ""Return only valid JSON. Do not use Markdown, code fences, explanation, advice, or any text before or after the JSON.""
+
+    Ready.cw
+</think>
+
+{""mode"": ""claim"", ""target"": ""hitno_kocenje""}"
+local-thinking,local,Qwen/Qwen3.5-9B,emergency_braking_not_critical,Da li je potrebno hitno kočenje?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,14.264,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian (""Da li je potrebno hitno kočenje?"").
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields: ""mode"", ""target"", ""speed_kmh"" (optional).
+    *   Logic for ""mode"":
+        *   ""request"": Driver tells system to do something.
+        *   ""claim"": Driver asks a question (including safety/allowance).
+        *   ""unsupported"": Does not clearly ask about specific targets, explanations, commands, vague, etc.
+    *   Logic for ""target"": Must be one of the specific list values.
+    *   Input Utterance: ""Da li je potrebno hitno kočenje?"" (Is emergency braking necessary?)
+
+2.  **Determine ""mode"":**
+    *   The utterance is a question (""Da li je...?"").
+    *   It asks about the necessity of an action (emergency braking).
+    *   According to the instructions: ""Use 'claim' when the driver asks a question, including whether an action is safe or allowed"".
+    *   So, ""mode"" = ""claim"".
+
+3.  **Determine ""target"":**
+    *   The question is about ""hitno kočenje"" (emergency braking).
+    *   Looking at the allowed target list: `blizu, brzo_priblizavanje, hitno_kocenje, losi_uslovi, nivo_kritican, nivo_visok, rizik_sudara, smanjena_vidljivost, tempomat_dozvoljen, ubrzavanje_dozvoljeno, usporavanje_potrebno, veoma_blizu`.
+    *   ""hitno_kocenje"" matches exactly.
+    *   So, ""target"" = ""hitno_kocenje"".
+
+4.  **Determine ""speed_kmh"":**
+    *   The utterance does not mention a specific speed.
+    *   So, omit this field.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""hitno_kocenje""}`
+
+6.  **Final Review:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   No extra text? Yes.
+    *   Matches the example style? Yes (e.g., Input: Da li je potrebno hitno kočenje? -> Output: {""mode"": ""claim"", ""target"": ""hitno_kocenje""}).
+
+7.  **Output Generation.**
+</think>
+
+{""mode"": ""claim"", ""target"": ""hitno_kocenje""}"
+local-thinking,local,Qwen/Qwen3.5-9B,critical_risk_low_visibility,Da li je situacija kritična?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,14.616,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian (""Da li je situacija kritična?"").
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields:
+        *   `mode`: ""request"", ""claim"", or ""unsupported"".
+        *   `target`: One specific value from a predefined list.
+        *   `speed_kmh`: Optional, only for specific targets.
+    *   Specific Rule: ""Da li je situacija kritična?"" translates to ""Is the situation critical?"".
+
+2.  **Determine `mode`:**
+    *   The utterance is a question (""Da li je...?"").
+    *   According to the instructions: ""Use 'claim' when the driver asks a question, including whether an action is safe or allowed"".
+    *   So, `mode` should be ""claim"".
+
+3.  **Determine `target`:**
+    *   The question is about the criticality of the situation (""situacija kritična"").
+    *   I need to match this to the allowed `target` values: `blizu`, `brzo_priblizavanje`, `hitno_kocenje`, `losi_uslovi`, `nivo_kritican`, `nivo_visok`, `rizik_sudara`, `smanjena_vidljivost`, `tempomat_dozvoljen`, `ubrzavanje_dozvoljeno`, `usporavanje_potrebno`, `veoma_blizu`.
+    *   ""Kritična"" maps directly to `nivo_kritican` (critical level).
+    *   Other options like `rizik_sudara` (risk of collision) or `hitno_kocenje` (emergency braking) are related but `nivo_kritican` is the most direct translation for ""critical situation/level"".
+    *   So, `target` should be ""nivo_kritican"".
+
+4.  **Determine `speed_kmh`:**
+    *   The utterance does not mention a specific speed.
+    *   So, this field should be omitted.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""nivo_kritican""}`
+
+6.  **Final Review:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   Correct fields? Yes.
+    *   Correct mapping? ""Da li je situacija kritična?"" -> Claim about critical level.
+
+7.  **Output Generation:**
+    *   {""mode"": ""claim"", ""target"": ""nivo_kritican""}
+</think>
+
+{""mode"": ""claim"", ""target"": ""nivo_kritican""}"
+local-thinking,local,Qwen/Qwen3.5-9B,critical_risk_good_visibility,Je li nivo opasnosti kritičan?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,21.826,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian (""Je li nivo opasnosti kritičan?"").
+    *   Task: Convert the utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields:
+        *   `mode`: ""request"", ""claim"", or ""unsupported"".
+        *   `target`: One specific value from a predefined list.
+        *   `speed_kmh`: Optional, only for specific targets.
+    *   Specific Input: ""Je li nivo opasnosti kritičan?"" (Is the danger level critical?)
+
+2.  **Determine the Mode:**
+    *   The utterance is a question (""Je li..."" = ""Is it..."").
+    *   It asks about the state of the danger level.
+    *   According to the instructions: ""Use 'claim' when the driver asks a question, including whether an action is safe or allowed"".
+    *   So, `mode` = ""claim"".
+
+3.  **Determine the Target:**
+    *   The question is about ""nivo opasnosti kritičan"" (danger level critical).
+    *   Looking at the allowed `target` values: `blizu`, `brzo_priblizavanje`, `hitno_kocenje`, `losi_uslovi`, `nivo_kritican`, `nivo_visok`, `rizik_sudara`, `smanjena_vidljivost`, `tempomat_dozvoljen`, `ubrzavanje_dozvoljeno`, `usporavanje_potrebno`, `veoma_blizu`.
+    *   The phrase ""nivo opasnosti kritičan"" maps directly to `nivo_kritican`.
+    *   So, `target` = ""nivo_kritican"".
+
+4.  **Check for Speed:**
+    *   No speed is mentioned.
+    *   So, `speed_kmh` is not included.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""nivo_kritican""}`
+
+6.  **Final Verification:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   Correct fields? Yes.
+    *   Correct mapping? ""Je li nivo opasnosti kritičan?"" -> Claim about critical level -> `nivo_kritican`.
+
+7.  **Output Generation:**
+    *   Ensure no extra whitespace or newlines outside the JSON structure if possible, though standard JSON formatting is usually fine. The prompt says ""Return only valid JSON"".
+
+    *   Wait, let's double check the `target` list.
+    *   List: `blizu`, `brzo_priblizavanje`, `hitno_kocenje`, `losi_uslovi`, `nivo_kritican`, `nivo_visok`, `rizik_sudara`, `smanjena_vidljivost`, `tempomat_dozvoljen`, `ubrzavanje_dozvoljeno`, `usporavanje_potrebno`, `veoma_blizu`.
+    *   Input: ""Je li nivo opasnosti kritičan?""
+    *   Match: `nivo_kritican`.
+
+    *   Mode: Question -> `claim`.
+
+    *   Result: `{""mode"": ""claim"", ""target"": ""nivo_kritican""}`.
+
+8.  **Final Formatting:**
+    *   Just the JSON string.
+
+```json
+{""mode"": ""claim"", ""target"": ""nivo_kritican""}
+```
+
+Wait, I need to make sure I don't output markdown code blocks like ```json ... ```. Just the raw JSON.
+
+Refining the thought: The prompt says ""Return only valid JSON. Do not use Markdown, code fences..."".
+
+So the output should be:
+{""mode"": ""claim"", ""target"": ""nivo_kritican""}
+
+Let's verify the language. Input is Serbo-Croatian. Output keys/values are English as per the schema definition.
+""nivo_kritican"" is the correct key from the list.
+
+Ready.cw
+</think>
+
+{""mode"": ""claim"", ""target"": ""nivo_kritican""}"
+local-thinking,local,Qwen/Qwen3.5-9B,cruise_on_clear_road,Uključi tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,16.063,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: ""Uključi tempomat."" (Serbo-Croatian for ""Activate cruise control."")
+    *   Task: Convert the driver's utterance into exactly one JSON object.
+    *   Constraints: No Markdown, no code fences, no explanation, no text before or after the JSON.
+    *   JSON Fields: ""mode"", ""target"", ""speed_kmh"" (optional).
+    *   Logic for ""mode"":
+        *   ""request"": Driver tells the system to do something (""Uključi..."", ""Postavi..."", ""Ubrzaj..."").
+        *   ""claim"": Driver asks a question.
+        *   ""unsupported"": Does not clearly ask about specific targets, explanations, commands not in list, etc.
+    *   Logic for ""target"":
+        *   Must be one of the specific list values.
+        *   If ""mode"" is ""request"", target must be one of: `tempomat_dozvoljen`, `ubrzavanje_dozvoljeno`.
+    *   Logic for ""speed_kmh"":
+        *   Optional. Include only if driver explicitly gives a requested speed for specific targets.
+
+2.  **Analyze the Input Utterance:**
+    *   Utterance: ""Uključi tempomat.""
+    *   Language: Serbo-Croatian.
+    *   Meaning: ""Activate cruise control.""
+    *   Intent: The driver is commanding the system to enable cruise control.
+    *   Mode: This is a command/request (""Uključi"" = Turn on/Activate). So, ""request"".
+    *   Target: The driver wants to activate cruise control. Looking at the allowed targets for ""request"" mode: `tempomat_dozvoljen` (cruise control allowed) or `ubrzavanje_dozvoljeno` (acceleration allowed). Activating cruise control implies the system should allow/enable cruise control. So, `tempomat_dozvoljen`.
+    *   Speed: No specific speed is mentioned.
+
+3.  **Construct the JSON:**
+    *   `mode`: ""request""
+    *   `target`: ""tempomat_dozvoljen""
+    *   `speed_kmh`: Not included (not specified).
+
+4.  **Verify Constraints:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   No code fences? Yes.
+    *   No extra text? Yes.
+
+5.  **Final Output Generation:**
+    ```json
+    {""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}
+    ```
+
+6.  **Double Check against Examples:**
+    *   Example: ""Uključi tempomat."" -> Output: {""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}
+    *   My input matches the example input exactly.
+    *   My output should match the example output exactly.
+
+7.  **Final Decision:**
+    {""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}
+</think>
+
+{""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}"
+local-thinking,local,Qwen/Qwen3.5-9B,cruise_low_visibility,Aktiviraj tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,13.147,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: ""Aktiviraj tempomat."" (Serbo-Croatian)
+    *   Task: Convert the driver's utterance into a specific JSON object.
+    *   Constraints:
+        *   Return *only* valid JSON.
+        *   No Markdown, code fences, explanation, advice, or text before/after.
+        *   Identify the ""mode"" (request, claim, unsupported).
+        *   Identify the ""target"" (from a specific list).
+        *   Include ""speed_kmh"" only if applicable and explicitly given.
+    *   Input Meaning: ""Activate cruise control.""
+
+2.  **Determine ""mode"":**
+    *   The utterance is a command (""Aktiviraj"" = Activate/Activate).
+    *   It tells the system to do something.
+    *   According to instructions: ""Use 'request' when the driver tells the system to do something"".
+    *   So, mode = ""request"".
+
+3.  **Determine ""target"":**
+    *   The command is about activating cruise control (""tempomat"").
+    *   Looking at the allowed targets for ""request"" mode: ""tempomat_dozvoljen"", ""ubrzavanje_dozvoljeno"".
+    *   ""Aktiviraj tempomat"" implies the driver wants to enable cruise control, which corresponds to the system allowing or setting cruise control.
+    *   The example ""Uključi tempomat."" maps to `{""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}`.
+    *   ""Aktiviraj"" is synonymous with ""Uključi"" in this context.
+    *   So, target = ""tempomat_dozvoljen"".
+
+4.  **Determine ""speed_kmh"":**
+    *   The utterance does not specify a speed.
+    *   So, this field should be omitted.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}`
+
+6.  **Final Verification:**
+    *   Valid JSON? Yes.
+    *   No markdown? Yes.
+    *   Correct fields? Yes.
+    *   Correct values based on examples? Yes (matches ""Uključi tempomat."" example).
+
+7.  **Output Generation:**
+    *   `{""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}`
+</think>
+
+{""mode"": ""request"", ""target"": ""tempomat_dozvoljen""}"
+local-thinking,local,Qwen/Qwen3.5-9B,cruise_permission_question,Da li smijem uključiti tempomat?,claim,tempomat_dozvoljen,,claim,tempomat_dozvoljen,,True,,1,19.836,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A driver's utterance in Serbo-Croatian (""Da li smijem uključiti tempomat?"").
+    *   Task: Convert the utterance into a specific JSON object.
+    *   Constraints:
+        *   Return *only* valid JSON.
+        *   No Markdown, code fences, explanation, advice, or text before/after.
+        *   Identify the ""mode"" (request, claim, unsupported).
+        *   Identify the ""target"" from a specific list.
+        *   Include ""speed_kmh"" only if applicable (request mode + specific targets).
+    *   Input Utterance: ""Da li smijem uključiti tempomat?"" (Can I turn on the cruise control?)
+
+2.  **Determine ""mode"":**
+    *   The utterance is a question (""Da li smijem..."" = ""Can I..."").
+    *   It asks about permission/allowance for an action (turning on cruise control).
+    *   According to the instructions: ""Use 'claim' when the driver asks a question, including whether an action is safe or allowed"".
+    *   Therefore, mode = ""claim"".
+
+3.  **Determine ""target"":**
+    *   The question is about enabling cruise control (""tempomat"").
+    *   Looking at the allowed target list: `blizu, brzo_priblizavanje, hitno_kocenje, losi_uslovi, nivo_kritican, nivo_visok, rizik_sudara, smanjena_vidljivost, tempomat_dozvoljen, ubrzavanje_dozvoljeno, usporavanje_potrebno, veoma_blizu`.
+    *   The relevant target for cruise control permission is `tempomat_dozvoljen`.
+    *   Therefore, target = ""tempomat_dozvoljen"".
+
+4.  **Determine ""speed_kmh"":**
+    *   This field is optional.
+    *   It should only be included if the driver explicitly gives a requested speed.
+    *   The utterance does not mention a specific speed.
+    *   Therefore, do not include `speed_kmh`.
+
+5.  **Construct JSON:**
+    *   `{""mode"": ""claim"", ""target"": ""tempomat_dozvoljen""}`
+
+6.  **Verify Constraints:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   No extra text? Yes.
+    *   Correct fields? Yes.
+
+7.  **Final Output Generation:**
+    *   `{""mode"": ""claim"", ""target"": ""tempomat_dozvoljen""}`
+
+    *Self-Correction/Double Check:*
+    *   Input: ""Da li smijem uključiti tempomat?""
+    *   Is it a request? No, it's a question (""Da li"").
+    *   Is it unsupported? No, it clearly asks about tempomat permission.
+    *   Target list check: `tempomat_dozvoljen` exists.
+    *   Mode check: `claim` is correct for questions.
+    *   JSON format check: Keys in double quotes, no trailing commas.
+
+    Result looks solid.
+
+    Wait, checking the examples provided in the prompt:
+    Input: Da li je bezbjedno uključiti tempomat?
+    Output: {""mode"": ""claim"", ""target"": ""tempomat_dozvoljen""}
+
+    My input: Da li smijem uključiti tempomat?
+    This is semantically equivalent to the example (""Can I turn on cruise control?"" vs ""Is it safe to turn on cruise control?""). Both fall under ""claim"" and ""tempomat_dozvoljen"".
+
+    Final JSON: {""mode"": ""claim"", ""target"": ""tempomat_dozvoljen""}
+</think>
+
+{""mode"": ""claim"", ""target"": ""tempomat_dozvoljen""}"
+local-thinking,local,Qwen/Qwen3.5-9B,cruise_speed_under_limit,Postavi brzinu na 100 km/h.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,6.109,"The user is asking me to convert a Serbo-Croatian utterance into a JSON object. The utterance is: ""Postavi brzinu na 100 km/h.""
+
+This translates to ""Set the speed to 100 km/h.""
+
+Looking at the examples:
+- ""Postavi brzinu na 100 km/h."" → {""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}
+
+This is a request to set speed, which maps to ""tempomat_dozvoljen"" with speed_kmh: 100.
+
+Let me verify:
+- ""mode"": ""request"" - because the driver is telling the system to do something (""Postavi..."" = ""Set..."")
+- ""target"": ""tempomat_dozvoljen"" - this is the only valid target for requests according to the instructions
+- ""speed_kmh"": 100 - the driver explicitly gave a requested speed of 100 km/h
+
+This matches the example given in the instructions exactly.
+</think>
+
+{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}"
+local-thinking,local,Qwen/Qwen3.5-9B,cruise_speed_collision_risk,Namjesti tempomat na 100.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,16.934,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: ""Namjesti tempomat na 100."" (Serbo-Croatian)
+    *   Task: Convert the driver's utterance into a specific JSON object.
+    *   Constraints:
+        *   Return *only* valid JSON.
+        *   No Markdown, code fences, explanation, advice, or text before/after.
+        *   Identify the ""mode"" (request, claim, unsupported).
+        *   Identify the ""target"" (from a specific list).
+        *   Include ""speed_kmh"" if applicable (only for specific targets in request mode).
+    *   Input Language: Serbo-Croatian.
+
+2.  **Analyze the Utterance:**
+    *   ""Namjesti tempomat na 100.""
+    *   Translation: ""Set the cruise control to 100.""
+    *   Intent: The driver is commanding the system to activate/set the cruise control (tempomat) to a specific speed.
+    *   Mode: This is a command/request (""Namjesti"" = Set/Adjust). So, ""request"".
+    *   Target: The driver is talking about ""tempomat"" (cruise control). The relevant target from the list is ""tempomat_dozvoljen"" (cruise control allowed/enabled).
+    *   Speed: The driver explicitly mentions ""100"". This implies 100 km/h. The target ""tempomat_dozvoljen"" allows for the ""speed_kmh"" field.
+
+3.  **Map to JSON Fields:**
+    *   `mode`: ""request"" (because it's a command ""Namjesti"").
+    *   `target`: ""tempomat_dozvoljen"" (because it's about cruise control).
+    *   `speed_kmh`: 100 (because the driver specified ""100"" and the target supports it).
+
+4.  **Verify Constraints:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   No extra text? Yes.
+    *   Correct field values based on the schema provided?
+        *   ""mode"": ""request"" is valid.
+        *   ""target"": ""tempomat_dozvoljen"" is in the allowed list.
+        *   ""speed_kmh"": 100 is a number, valid for this target.
+
+5.  **Construct Output:**
+    ```json
+    {""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}
+    ```
+
+6.  **Final Check:**
+    *   Input: ""Namjesti tempomat na 100.""
+    *   Example similar: ""Postavi brzinu na 100 km/h."" -> {""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}
+    *   My output matches the logic.
+
+7.  **Final Output Generation:** (Ensure no markdown blocks)
+    {""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}
+</think>
+
+{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}"
+local-thinking,local,Qwen/Qwen3.5-9B,cruise_speed_over_limit,Postavi tempomat na 140 km/h.,request,tempomat_dozvoljen,140,request,tempomat_dozvoljen,140.0,True,,1,17.326,"Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: ""Postavi tempomat na 140 km/h."" (Serbo-Croatian)
+    *   Task: Convert the driver's utterance into a specific JSON object.
+    *   Constraints:
+        *   Return *only* valid JSON.
+        *   No Markdown, code fences, explanation, advice, or text before/after.
+        *   Identify the ""mode"" (request, claim, unsupported).
+        *   Identify the ""target"" (from a specific list).
+        *   Include ""speed_kmh"" if applicable (only for specific targets in request mode).
+    *   Input Language: Serbo-Croatian.
+
+2.  **Analyze the Utterance:**
+    *   ""Postavi tempomat na 140 km/h.""
+    *   Translation: ""Set the cruise control to 140 km/h.""
+    *   Intent: The driver is commanding the system to enable/adjust cruise control (tempomat) to a specific speed.
+    *   Mode: This is a command/request (""Postavi..."" = Set...). So, ""request"".
+    *   Target: The driver is asking about enabling/setting cruise control. Looking at the allowed targets: `tempomat_dozvoljen` (cruise control allowed/enabled).
+    *   Speed: The driver explicitly mentions ""140 km/h"". This maps to the `speed_kmh` field.
+    *   Target List Check: `tempomat_dozvoljen` is in the list. `ubrzavanje_dozvoljeno` is also in the list, but ""Postavi tempomat"" specifically relates to the cruise control system itself, not just accelerating. The examples show ""Uključi tempomat"" -> `tempomat_dozvoljen`. ""Postavi brzinu na 100 km/h"" -> `tempomat_dozvoljen`. So ""Postavi tempomat na 140 km/h"" should also be `tempomat_dozvoljen`.
+
+3.  **Construct the JSON:**
+    *   `mode`: ""request""
+    *   `target`: ""tempomat_dozvoljen""
+    *   `speed_kmh`: 140
+
+4.  **Verify Constraints:**
+    *   Valid JSON? Yes.
+    *   No Markdown? Yes.
+    *   No extra text? Yes.
+    *   Correct fields? Yes.
+
+5.  **Final Output Generation:**
+    ```json
+    {""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 140}
+    ```
+
+6.  **Double Check against Examples:**
+    *   Example: ""Postavi brzinu na 100 km/h."" -> `{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 100}`
+    *   My Input: ""Postavi tempomat na 140 km/h.""
+    *   My Output: `{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 140}`
+    *   Matches the pattern.
+
+7.  **Final Decision:** Output the JSON string directly.cw
+</think>
+
+{""mode"": ""request"", ""target"": ""tempomat_dozvoljen"", ""speed_kmh"": 140}"
+openai,openai,gpt-5.6-luna,collision_risk_close_fast,Postoji li rizik sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,1.048,"{""mode"":""claim"",""target"":""rizik_sudara""}"
+openai,openai,gpt-5.6-luna,collision_risk_safe_distance,Ima li opasnosti od sudara?,claim,rizik_sudara,,claim,rizik_sudara,,True,,1,1.621,"{""mode"":""claim"",""target"":""rizik_sudara""}"
+openai,openai,gpt-5.6-luna,slow_down_low_visibility,Da li treba da usporim?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,3.114,"{""mode"":""claim"",""target"":""usporavanje_potrebno""}"
+openai,openai,gpt-5.6-luna,slow_down_clear_road,Moram li smanjiti brzinu?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.933,"{""mode"":""claim"",""target"":""usporavanje_potrebno""}"
+openai,openai,gpt-5.6-luna,brake_collision_risk,Trebam li kočiti?,claim,usporavanje_potrebno,,claim,usporavanje_potrebno,,True,,1,0.809,"{""mode"":""claim"",""target"":""usporavanje_potrebno""}"
+openai,openai,gpt-5.6-luna,emergency_braking_very_close,Trebam li naglo zakočiti?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,0.94,"{""mode"":""claim"",""target"":""hitno_kocenje""}"
+openai,openai,gpt-5.6-luna,emergency_braking_not_critical,Da li je potrebno hitno kočenje?,claim,hitno_kocenje,,claim,hitno_kocenje,,True,,1,0.818,"{""mode"":""claim"",""target"":""hitno_kocenje""}"
+openai,openai,gpt-5.6-luna,critical_risk_low_visibility,Da li je situacija kritična?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,0.889,"{""mode"":""claim"",""target"":""nivo_kritican""}"
+openai,openai,gpt-5.6-luna,critical_risk_good_visibility,Je li nivo opasnosti kritičan?,claim,nivo_kritican,,claim,nivo_kritican,,True,,1,0.874,"{""mode"":""claim"",""target"":""nivo_kritican""}"
+openai,openai,gpt-5.6-luna,cruise_on_clear_road,Uključi tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,0.829,"{""mode"":""request"",""target"":""tempomat_dozvoljen""}"
+openai,openai,gpt-5.6-luna,cruise_low_visibility,Aktiviraj tempomat.,request,tempomat_dozvoljen,,request,tempomat_dozvoljen,,True,,1,0.781,"{""mode"":""request"",""target"":""tempomat_dozvoljen""}"
+openai,openai,gpt-5.6-luna,cruise_permission_question,Da li smijem uključiti tempomat?,claim,tempomat_dozvoljen,,claim,tempomat_dozvoljen,,True,,1,0.832,"{""mode"":""claim"",""target"":""tempomat_dozvoljen""}"
+openai,openai,gpt-5.6-luna,cruise_speed_under_limit,Postavi brzinu na 100 km/h.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,0.832,"{""mode"":""request"",""target"":""tempomat_dozvoljen"",""speed_kmh"":100}"
+openai,openai,gpt-5.6-luna,cruise_speed_collision_risk,Namjesti tempomat na 100.,request,tempomat_dozvoljen,100,request,tempomat_dozvoljen,100.0,True,,1,0.876,"{""mode"":""request"",""target"":""tempomat_dozvoljen"",""speed_kmh"":100}"
+openai,openai,gpt-5.6-luna,cruise_speed_over_limit,Postavi tempomat na 140 km/h.,request,tempomat_dozvoljen,140,request,tempomat_dozvoljen,140.0,True,,1,1.09,"{""mode"":""request"",""target"":""tempomat_dozvoljen"",""speed_kmh"":140}"

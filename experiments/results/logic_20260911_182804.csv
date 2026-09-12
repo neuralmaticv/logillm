@@ -1,0 +1,16 @@
+﻿case_id,mode,target,speed_kmh,udaljenost,relativna_brzina,vidljivost,ogranicenje_brzine,expected_verdict,verdict,correct,logic_time_ms
+collision_risk_close_fast,claim,rizik_sudara,,12,6,500,130,MORA VAŽITI,MORA VAŽITI,True,100.609
+collision_risk_safe_distance,claim,rizik_sudara,,42,0,500,130,NE MORA VAŽITI,NE MORA VAŽITI,True,0.138
+slow_down_low_visibility,claim,usporavanje_potrebno,,42,0,30,130,MORA VAŽITI,MORA VAŽITI,True,60.066
+slow_down_clear_road,claim,usporavanje_potrebno,,42,0,500,130,NE MORA VAŽITI,NE MORA VAŽITI,True,0.145
+brake_collision_risk,claim,usporavanje_potrebno,,12,6,500,130,MORA VAŽITI,MORA VAŽITI,True,103.608
+emergency_braking_very_close,claim,hitno_kocenje,,3,10,500,130,MORA VAŽITI,MORA VAŽITI,True,110.287
+emergency_braking_not_critical,claim,hitno_kocenje,,12,6,500,130,NE MORA VAŽITI,NE MORA VAŽITI,True,93.517
+critical_risk_low_visibility,claim,nivo_kritican,,12,6,30,130,MORA VAŽITI,MORA VAŽITI,True,112.038
+critical_risk_good_visibility,claim,nivo_kritican,,12,6,500,130,NE MORA VAŽITI,NE MORA VAŽITI,True,94.428
+cruise_on_clear_road,request,tempomat_dozvoljen,,42,0,500,130,SMIJE,SMIJE,True,0.372
+cruise_low_visibility,request,tempomat_dozvoljen,,42,0,30,130,NE SMIJE,NE SMIJE,True,529.548
+cruise_permission_question,claim,tempomat_dozvoljen,,42,0,500,130,SMIJE,SMIJE,True,0.353
+cruise_speed_under_limit,request,tempomat_dozvoljen,100,42,0,500,130,SMIJE,SMIJE,True,0.585
+cruise_speed_collision_risk,request,tempomat_dozvoljen,100,12,6,500,130,NE SMIJE,NE SMIJE,True,614.781
+cruise_speed_over_limit,request,tempomat_dozvoljen,140,42,0,500,130,NE SMIJE,NE SMIJE,True,555.401
